@@ -1,0 +1,109 @@
+.upgrade-plan-page {
+    padding: 20px;
+    max-width: 800px;
+    margin: 20px auto;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.upgrade-container {
+    max-width: 600px; /* Example max-width */
+    margin: 0 auto; /* Center the container */
+    padding: 20px; /* Add padding */
+    text-align: center; /* Keep text centered */
+}
+
+body {
+    font-family: 'Arial', sans-serif; /* Base font-family */
+    font-size: 16px; /* Base font-size */
+}
+
+h2 {
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 2em; /* Define font-size */
+    font-weight: bold; /* Define font-weight */
+    color: #333; /* Define color */
+}
+
+.upgrade-container p {
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+
+.plan-benefits {
+    margin: 20px 0; /* Adjust margin */
+    padding: 15px;
+    background-color: #eef;
+    border-radius: 6px;
+    text-align: left;
+}
+
+.plan-benefits ul {
+    list-style: disc;
+    padding-left: 20px; /* Keep padding-left */
+    margin: 0; /* Keep margin */
+}
+
+.plan-benefits li {
+    margin-bottom: 8px; /* Keep margin-bottom */
+    color: #444;
+    font-size: 1em; /* Set font-size */
+    line-height: 1.5; /* Set line-height */
+}
+
+.upgrade-container a[href^="tel:"] {
+    /* Enhance styling for the phone number link */
+    color: #28a745; /* Green color for prominence, suggesting call */
+    font-weight: bold; /* Bold font weight */
+    text-decoration: none; /* Remove underline */
+    font-size: 1.2em; /* Slightly larger font size */
+    transition: color 0.3s ease; /* Smooth color transition on hover */
+    border-bottom: 1px dashed #28a745; /* Add a dashed underline */
+    padding-bottom: 2px; /* Space between text and underline */
+}
+
+.upgrade-container a[href^="tel:"]:hover {
+    text-decoration: underline;
+}
+
+.cta-container {
+    margin-top: 30px;
+    /* Refine styling for the Button within the .cta-container */
+}
+
+.cta-container .MuiButton-containedPrimary {
+    background-color: #007bff; /* Standard blue background */
+    color: white; /* White text color */
+    padding: 12px 24px; /* Adjust padding */
+}
+
+/* Basic responsiveness for smaller screens */
+@media (max-width: 600px) {
+ .upgrade-plan-page {
+        padding: 15px;
+ }
+
+    .upgrade-container {
+        padding: 15px; /* Adjust padding for smaller screens */
+    }
+
+    h2 {
+        font-size: 1.8em;
+    }
+
+    p {
+ font-size: 0.9em;
+ line-height: 1.4;
+    }
+
+    .plan-benefits {
+        padding: 10px;
+    }
+
+    .plan-benefits ul {
+        padding-left: 15px;
+    }
+}
