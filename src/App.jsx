@@ -41,11 +41,11 @@ import LeadsListPage from './pages/LeadsList.jsx';
 import AddLeadForm from './components/crm/AddLeadForm.jsx';
 import LeadDetailsPage from './pages/LeadDetailsPage.jsx';
 import EditLeadPage from './pages/EditLeadPage.jsx'; // Corrected path
-import EventsListPage from './pages/dashboard/crm/events/EventsListPage';
+import EventsListPage from './pages/dashboard/crm/events/EventsListPage'; // Corrected path
 import AddEventForm from './components/crm/AddEventForm.jsx';
 import EventDetailsPage from './pages/dashboard/crm/events/EventDetailsPage';
 import EditEventPage from './pages/dashboard/crm/events/EditEventPage';
-import VolunteersListPage from './pages/dashboard/crm/volunteers/VolunteersListPage';
+import VolunteersListPage from './components/crm/VolunteersList.jsx'; // Corrected path
 import AddVolunteerForm from './components/crm/AddVolunteerForm.jsx';
 import VolunteerDetailsPage from './pages/dashboard/crm/volunteers/VolunteerDetailsPage';
 import EditVolunteerPage from './pages/dashboard/crm/volunteers/EditVolunteerPage';
