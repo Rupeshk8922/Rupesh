@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { collection, getDocs, doc, deleteDoc } from 'firebase/firestore';
 import { db } from '../../../firebase/config'; // Adjust the path as needed
 import { useauthContext } from '../../../context/authContext'; // Changed import here
-import { useAuth } from '../../../contexts/authContext.jsx'; // Changed import here
   const { companyId } = useAuth(); // Get the logged-in user's company ID
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
