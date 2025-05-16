@@ -13,6 +13,9 @@ COPY . .
 # Build the Vite React application
 RUN npm run build
 
+# List contents of dist to verify build output
+RUN ls -al /app/dist
+
 # --- Stage 2: Serve the Static Files ---
 FROM node:20-alpine AS serve-stage
 
