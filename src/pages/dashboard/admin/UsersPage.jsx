@@ -4,8 +4,10 @@ import { db } from '../../../firebase/config'; // Adjust the path as needed
 import { useauthContext } from '../../../context/authContext'; // Changed import here
 import { useAuth } from '../../../contexts/authContext.jsx';
 
+
 function UsersPage() {
     const [users, setUsers] = useState([]); // Add state for users
+  const [loading, setLoading] = useState(true); // Add state for loading
   const { user } = useAuth(); // Get the logged-in user
     const fetchUsers = async () => {
       if (!companyId) {
@@ -30,9 +32,9 @@ function UsersPage() {
       }
     };
 
-    fetchUsers();
-  }, [companyId]); // Re-run effect when companyId changes
-
+  useEffect(() => {
+ fetchUsers();
+  }, [user, companyId]); // Re-run effect when user or companyId changes
   const handleDelete = async (userId) => {
     if (window.confirm('Are you sure you want to delete this user?')) {
       try {
