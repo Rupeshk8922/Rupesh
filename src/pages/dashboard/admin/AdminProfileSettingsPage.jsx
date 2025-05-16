@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../../firebase/config';
 import { useauthContext } from '../../../contexts/authContext'; // Assuming useauthContext is used
-
+import { useAuth } from '../../../contexts/authContext.jsx';
 function AdminProfileSettingsPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -10,9 +10,8 @@ function AdminProfileSettingsPage() {
   const [error, setError] = useState(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateSuccess, setUpdateSuccess] = useState(false);
-
-  const { user, companyId } = useauthContext(); // Assuming useauthContext provides user and companyId and is now named useAuth
-  useEffect(() => {
+  const { user, companyId } = useAuth();
+  useEffect(() => { // Assuming useauthContext provides user and companyId and is now named useAuth
     const fetchAdminProfile = async () => {
       if (!user || !companyId) {
         return;
