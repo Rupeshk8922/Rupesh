@@ -1,8 +1,9 @@
+jsx
 import React from 'react';
 import { useState } from 'react';
 import { collection, addDoc } from 'firebase/firestore';
 import { db } from '../../firebase/config'; // Adjust path as needed
-import { useauthContext} from '../../context/authContext'; // Adjust path as needed
+import { useAuth } from '../../contexts/authContext.jsx'; // Adjust path as needed
 
 function AddEventForm() {
   const [formData, setFormData] = useState({
@@ -69,7 +70,7 @@ function AddEventForm() {
     if (description && description.length > 300) return 'Description must be under 300 characters.';
     return '';
   };
-  const { companyId } = useauthContext(); // Get companyId from Auth context
+  const { companyId } = useAuth(); // Get companyId from Auth context
 
   const validateForm = () => {
     const nameValid = validateName(formData.name) === '';
@@ -99,7 +100,7 @@ function AddEventForm() {
     setLocationError(locationErr);
     setVolunteerCapacityError(volunteerCapacityErr);
     // setDescriptionError(descriptionErr); // Need to add description error state
-    
+
     // If any required field has an error, stop submission
     if (nameErr || eventTypeErr || dateErr || locationErr || volunteerCapacityErr) {
       return;
