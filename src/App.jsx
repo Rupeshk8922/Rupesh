@@ -51,7 +51,7 @@ import VolunteerDetailsPage from './pages/dashboard/crm/volunteers/VolunteerDeta
 import EditVolunteerPage from './pages/dashboard/crm/volunteers/EditVolunteerPage';
 // Subscription Management Pages
 import SubscriptionPage from './pages/SubscriptionPage.jsx';
-import UpgradePlan from './pages/dashboard/admin/UpgradePlan';
+import UpgradePlan from './pages/UpgradePlan.jsx';
 // Error Page, Assuming ErrorPage is in pages
 import ErrorPage from './pages/ErrorPage'; // Assuming ErrorPage is in pages
 
