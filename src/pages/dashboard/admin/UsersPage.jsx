@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { collection, getDocs, doc, deleteDoc } from 'firebase/firestore';
 import { db } from '../../../firebase/config'; // Adjust the path as needed
 import { useauthContext } from '../../../context/authContext'; // Changed import here
-  const { companyId } = useAuth(); // Get the logged-in user's company ID
+import { useAuth } from '../../../contexts/authContext.jsx'; // Changed import here
+
+function UsersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { user } = useAuth(); // Get the logged-in user
-  useEffect(() => {
     const fetchUsers = async () => {
       if (!companyId) {
         setError('Company ID is not available.');
@@ -29,7 +30,7 @@ import { useauthContext } from '../../../context/authContext'; // Changed import
         setLoading(false);
       }
     };
-    // Fetch users only if companyId is available
+
     fetchUsers();
   }, [companyId]); // Re-run effect when companyId changes
 
