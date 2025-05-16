@@ -41,7 +41,7 @@ import LeadsListPage from './pages/LeadsList.jsx';
 import AddLeadForm from './components/crm/AddLeadForm.jsx';
 import LeadDetailsPage from './pages/LeadDetailsPage.jsx';
 import EditLeadPage from './pages/EditLeadPage.jsx'; // Corrected path
-import EventsListPage from './pages/dashboard/crm/events/EventsListPage';
+import EventsListPage from './components/crm/EventsListPage';
 import AddEventForm from './pages/dashboard/crm/events/AddEventForm';
 import EventDetailsPage from './pages/dashboard/crm/events/EventDetailsPage';
 import EditEventPage from './pages/dashboard/crm/events/EditEventPage';
