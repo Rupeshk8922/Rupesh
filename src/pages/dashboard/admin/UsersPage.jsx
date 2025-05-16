@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { collection, getDocs, doc, deleteDoc } from 'firebase/firestore';
 import { db } from '../../../firebase/config'; // Adjust the path as needed
-import { useauthContext } from '../../../context/authContext'; // Changed import here
 import { useAuth } from '../../../contexts/authContext.jsx';
     const [users, setUsers] = useState([]); // Add state for users
   const [loading, setLoading] = useState(true); // Add state for loading
