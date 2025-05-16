@@ -1,7 +1,6 @@
 import React from 'react'; // Keep React import if JSX is used
-import { useAuth } from '../../../contexts/authContext'; // Assuming CSR Dashboard needs auth context
-
-const CSRDashboard = () => {
+import { useAuth } from '../../../contexts/authContext.jsx'; // Assuming CSR Dashboard needs auth context
+const OutreachDashboard = () => {
   const { user } = useAuth(); // Example usage of the auth context
   return (
     <div>
@@ -10,5 +9,4 @@ const CSRDashboard = () => {
     </div>
   );
 };
-
-export default CSRDashboard;
+export default OutreachDashboard;

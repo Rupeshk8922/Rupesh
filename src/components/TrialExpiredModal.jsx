@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 
+// This component does not directly import any hooks from src/hooks
 const TrialExpiredModal = ({ isOpen, onClose, isAdmin }) => {
   const navigate = useNavigate();
 

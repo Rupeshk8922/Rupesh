@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/authContext'; // Assuming you might need user info here
-import { useSubscription } from '../contexts/SubscriptionContext';
+import { useSubscription } from '../contexts/SubscriptionContext'; // Assuming this hook exists
 
 const CheckoutSuccessPage = () => {
   const location = useLocation();

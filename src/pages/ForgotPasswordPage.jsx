@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { sendPasswordReset } from '../firebase/config';
 import { CircularProgress } from '@mui/material';
 // Assuming you might need auth context for redirection or user status later
-
+// import { useAuth } from '../contexts/authContext';
 const ForgotPasswordPage = () => {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);

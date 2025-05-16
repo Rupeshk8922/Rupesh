@@ -18,7 +18,7 @@ import {
 } from '@mui/material';
 import CallIcon from '@mui/icons-material/Call';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import { collection, getDocs, addDoc, query, where } from 'firebase/firestore';
+import { collection, getDocs, addDoc } from 'firebase/firestore';
 import { db } from '../firebase/config.js';
 import { useNavigate } from 'react-router-dom';
 

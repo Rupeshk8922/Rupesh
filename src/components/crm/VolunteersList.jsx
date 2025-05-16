@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { doc, deleteDoc } from 'firebase/firestore';
 import { db } from '../../firebase/config';
 import { useAuth } from '../../contexts/authContext';
-import useVolunteers from '../../hooks/useVolunteers'; 
+import useVolunteers from '../../hooks/useVolunteers.jsx'; 
 
 // Predefined options for filters and roles
 const ROLES = {

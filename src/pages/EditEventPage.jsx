@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { collection, query, onSnapshot, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase/config'; // Firestore config
-import { useAuth } from '../contexts/authContext';
+import { useAuth } from '../contexts/authContext.jsx';
 
 function EditEventPage() { // Review for mobile responsiveness, especially form layout.
   const { eventId } = useParams(); // Get eventId from URL

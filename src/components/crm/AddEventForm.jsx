@@ -3,7 +3,7 @@ import React from 'react';
 import { useState } from 'react';
 import { collection, addDoc } from 'firebase/firestore';
 import { db } from '../../firebase/config'; // Adjust path as needed
-import { useAuth } from '../../contexts/authContext.jsx'; // Adjust path as needed
+import { useAuth } from '../../contexts/authContext'; // Adjust path as needed
 
 function AddEventForm() {
   const [formData, setFormData] = useState({

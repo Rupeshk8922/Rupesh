@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
-import { useauthContext } from '../contexts/authContext';
+// import { useauthContext } from '../contexts/authContext'; // This import was unused and can be removed
 import { useAuth } from '../contexts/authContext';
 
 function EditOutreachContactPage() {

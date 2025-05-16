@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import useEvents from '../../hooks/useEvents';
 import { useNavigate } from 'react-router-dom';
+import useEvents from '../../hooks/useEvents.jsx';
 import { doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { FaCalendarAlt, FaTag, FaMapMarkerAlt, FaUsers, FaCircle, FaSquare } from 'react-icons/fa';
 import { FaSortAlphaUp, FaSortNumericUp, FaArrowUp, FaArrowDown } from 'react-icons/fa';

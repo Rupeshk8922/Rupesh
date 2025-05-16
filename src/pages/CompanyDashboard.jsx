@@ -1,6 +1,6 @@
 // src/pages/CompanyDashboard.jsx
 import React from 'react';
-import { useFetchCompanyData } from '../hooks/useFetchCompanyData';
+import { useFetchCompanyData } from '../hooks/useFetchCompanyData.jsx';
 import { useAuth } from '../hooks/useAuth'; // Import useAuth hook
 import { useCompanyUsers } from '../hooks/useCompanyUsers';
 import DashboardLayout from '../components/DashboardLayout'; // Import DashboardLayout

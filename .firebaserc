@@ -1,5 +1,15 @@
 {
   "projects": {
     "default": "empact-yhwq3"
-  }
+  },
+  "targets": {
+    "empact-yhwq3": {
+      "hosting": {
+        "studio": [
+          "empact-yhwq3"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }

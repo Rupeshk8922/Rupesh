@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { collection, addDoc } from 'firebase/firestore';
 import { db } from '../../firebase/config';
 import { useAuth } from '../../contexts/authContext';
-
+import { useVolunteers } from '../../hooks/useVolunteers';
 
 function AddVolunteerForm() {
   const [formData, setFormData] = useState({
@@ -32,6 +32,7 @@ function AddVolunteerForm() {
   const [notesError, setNotesError] = useState('');
 
   const { companyId } = useAuth();
+  const { addVolunteer } = useVolunteers();
 
   if (!companyId) {
     return (
@@ -128,25 +129,26 @@ function AddVolunteerForm() {
       return;
     }
 
-    setLoading(true);
+    setLoading(true); // Set loading state to true
     try {
-      const volunteersCollectionRef = collection(db, 'data', companyId, 'volunteers');
-      await addDoc(volunteersCollectionRef, {
+      await addVolunteer(companyId, {
         ...formData,
         createdAt: new Date(),
       });
 
       setSuccessMessage('Volunteer added successfully!');
-      setFormData({
-        fullName: '',
+
+      // Reset form and errors
+      setFormData({ // Corrected reset
+ fullName: '',
         email: '',
-        phone: '',
+ phone: '',
         skillsInterests: '',
-        availability: '',
+ availability: '',
         location: '',
         preferredCauses: '',
-        status: '',
-        notes: '',
+ status: '',
+ notes: '',
       });
 
       // Clear errors on success
@@ -158,9 +160,9 @@ function AddVolunteerForm() {
       setLocationError('');
       setPreferredCausesError('');
       setStatusError('');
-      setNotesError('');
+      setNotesError(''); // Corrected clear
     } catch (err) {
-      console.error('Error adding volunteer:', err);
+      console.error('Error adding volunteer:', err); // Log the specific error
       setError('Failed to add volunteer.');
     } finally {
       setLoading(false);

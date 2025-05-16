@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc, deleteDoc, getFirestore } from 'firebase/firestore';
 import { useauthContext } from '../contexts/authContext';
-import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
+import ConfirmDeleteModal from '../components/ConfirmDeleteModal.jsx';
 
 function EventDetailsPage() {
   const { eventId } = useParams();

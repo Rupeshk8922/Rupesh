@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase/config'; // Assuming you have initialized Firebase and exported db
 import { useAuth } from '../contexts/authContext'; // Corrected import path
-
+import { useFetchSubscriptionStatus } from '../hooks/useFetchSubscriptionStatus.jsx'; // Import useFetchSubscriptionStatus hook
 function AdminProfileSettingsPage() { // Review for mobile responsiveness, especially form layout.
   const { currentUser } = useAuth(); // Use useAuth hook
   // For now, we'll use basic data from auth context and a placeholder for phone number

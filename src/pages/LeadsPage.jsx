@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { fetchLeads, assignLead as assignLeadService } from '../services/leadsService'; // Import service functions
 import { fetchUsersForAssignment } from '../services/userService'; // Assuming a userService for fetching users
 import { useAuth } from '../contexts/authContext'; // Use the correct hook name and path
+import { useFetchLeads } from '../hooks/useFetchLeads.jsx'; // Import the hook with the .jsx extension
+import { useFetchCompanyUsers } from '../hooks/useFetchCompanyUsers.jsx'; // Import the hook with the .jsx extension
 
 function LeadsPage() {
   const { user, companyId, userRole } = useAuth(); // Use the correctly imported hook
-  const [leads, setLeads] = useState([]);
-  const [assignableUsers, setAssignableUsers] = useState([]);
   const [isMobileView, setIsMobileView] = useState(false);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -14,40 +14,11 @@ function LeadsPage() {
   const [filterAssignedTo, setFilterAssignedTo] = useState('');
   const [error, setError] = useState(null);
   const [availableStatuses, setAvailableStatuses] = useState([]);
+  const { leads, loading: leadsLoading, error: leadsError, fetchLeads: fetchLeadsHook } = useFetchLeads(companyId);
+  const { users: assignableUsers, loading: usersLoading, error: usersError, fetchUsers: fetchUsersHook } = useFetchCompanyUsers(companyId);
 
   useEffect(() => {
-    const fetchLeadsAndUsers = async () => {
-      setLoading(true);
-      setError(null);
-
-      if (!companyId) {
-        setError('Company ID is missing.');
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const leadsData = await fetchLeads(companyId);
-        setLeads(leadsData);
-
-        const usersData = await fetchUsersForAssignment(companyId);
-        setAssignableUsers(usersData);
-
-        const uniqueStatuses = [...new Set(leadsData.map(lead => lead.status).filter(status => status))];
-        setAvailableStatuses(uniqueStatuses);
-      } catch (err) {
-        setError('Failed to fetch data.');
-        console.error('Error fetching leads or users:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchLeadsAndUsers();
-  }, [companyId]);
-
-  // Effect to determine mobile view based on screen width
-  useEffect(() => {
+    // Effect to determine mobile view based on screen width
     const handleResize = () => {
       setIsMobileView(window.innerWidth < 768); // Use Tailwind's 'md' breakpoint
     };
@@ -58,9 +29,20 @@ function LeadsPage() {
     return () => window.removeEventListener('resize', handleResize); // Clean up event listener
   }, []);
 
+  useEffect(() => {
+    if (leads) {
+      const uniqueStatuses = [...new Set(leads.map(lead => lead.status).filter(status => status))];
+      setAvailableStatuses(uniqueStatuses);
+    }
+  }, [leads]);
+
+  const isLoading = loading || leadsLoading || usersLoading;
+  const displayError = error || leadsError || usersError;
+
+
   const handleAssignLead = async (leadId, userId) => {
     if (!companyId) {
-      setError('Company ID is missing, cannot assign lead.');
+      setError('Company ID is missing, cannot assign lead.'); // Use local error state
       return;
     }
     setLoading(true);
@@ -68,10 +50,10 @@ function LeadsPage() {
 
     try {
       await assignLeadService(leadId, userId, companyId);
+      // Refresh data after assignment. You might have a function in your hooks to do this.
+      fetchLeadsHook();
+      fetchUsersHook(); // Refresh assignable users in case assignments change who is available
 
-      setLeads(prevLeads => prevLeads.map(lead =>
-        lead.id === leadId ? { ...lead, assignedTo: userId } : lead
-      ));
     } catch (err) {
       setError('Failed to assign lead.');
       console.error('Error assigning lead:', err);
@@ -111,11 +93,11 @@ function LeadsPage() {
     );
   }
 
-  if (loading) {
+  if (isLoading) {
     return <div className="p-4 text-center text-gray-600">Loading leads...</div>;
   }
 
-  if (error) {
+  if (displayError) {
     return <div className="p-4 text-red-600 text-center">Error: {error}</div>;
   }
 
@@ -187,7 +169,7 @@ function LeadsPage() {
                           value={lead.assignedTo || ''}
                           onChange={(e) => handleAssignLead(lead.id, e.target.value === '' ? null : e.target.value)}
                           className="border rounded p-1 text-sm w-full"
-                          disabled={loading}
+                          disabled={isLoading}
                         >
                           <option value="">Unassigned</option>
                           {assignableUsers.map(u => (
@@ -237,7 +219,7 @@ function LeadsPage() {
                               value={lead.assignedTo || ''}
                               onChange={(e) => handleAssignLead(lead.id, e.target.value === '' ? null : e.target.value)}
                               className="border rounded p-1 text-sm w-full sm:w-auto"
-                              disabled={loading}
+                              disabled={isLoading}
                             >
                               <option value="">Unassigned</option>
                               {assignableUsers.map(u => (

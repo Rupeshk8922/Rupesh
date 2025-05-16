@@ -1,11 +1,10 @@
 import { useState, useEffect, Fragment } from "react";
 import { doc, updateDoc, getDocs, collection, query } from "firebase/firestore";
 import { db } from "../../firebase/config";
-import { useAuth } from "../../contexts/authContext";
+import { useAuth } from "../../contexts/authContext.jsx";
 import { Dialog, Transition } from '@headlessui/react';
 
 function AssignLeadModal({ isOpen, onClose, leadId }) { // Removed duplicate import
-  const [assignedTo, setAssignedTo] = useState("");
   const [users, setUsers] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(true); // Removed duplicate import
   const [error, setError] = useState(null);

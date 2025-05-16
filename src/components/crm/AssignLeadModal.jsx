@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
-import { collection, query, where, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, updateDoc } from 'firebase/firestore'; // No hooks used here
 import { db } from '../../firebase/config'; // Import your Firestore instance
 
 const AssignLeadModal = ({ isOpen, onClose, leadId }) => {

@@ -12,7 +12,7 @@ import {
   Timestamp,
 } from 'firebase/firestore';
 import { db } from '../../../firebase/config';
-import { useAuth } from '../../../contexts/authContext';
+import { useAuth } from '../../../contexts/authContext.jsx';
 const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);

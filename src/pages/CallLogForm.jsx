@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import { TextField, Button, FormControl, InputLabel, Select, MenuItem, FormControlLabel, RadioGroup, Radio, Typography, Grid, Box, CircularProgress, Alert
 } from '@mui/material';
 import dayjs from 'dayjs';
@@ -9,11 +9,11 @@ import { db } from '../firebase/config';
 
 function CallLogForm() {
   const [donors, setDonors] = useState([]);
-  const [selectedDonor, setSelectedDonor] = useState('');
-  const [callOutcome, setCallOutcome] = useState('');
+  const [selectedDonor, setSelectedDonor] = useState("");
+  const [callOutcome, setCallOutcome] = useState("");
   const [followUpDate, setFollowUpDate] = useState(dayjs());
   const [followUpTime, setFollowUpTime] = useState(dayjs());
-  const [donationStatus, setDonationStatus] = useState('');
+  const [donationStatus, setDonationStatus] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
@@ -56,7 +56,7 @@ function CallLogForm() {
       // Add the call log data to the Firestore collection
       await addDoc(collection(db, 'callLogs'), callLogData);
       setSuccess(true);
-
+ 
       // Clear form fields after successful submission
       setSelectedDonor('');
       setCallOutcome('');
@@ -162,7 +162,7 @@ function CallLogForm() {
           </form>
         )}
       </Box> {/* Close Box inside LocalizationProvider */}
-    </LocalizationProvider>
+    </LocalizationProvider >
   );
 }
 

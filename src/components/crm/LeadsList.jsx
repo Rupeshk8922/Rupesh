@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import useLeads from '../../hooks/useLeads';
+import useLeads from '../../hooks/useLeads.jsx';
 import { useauthContext } from '../../contexts/authContext';
 import { useAuth } from '../../contexts/authContext';
 import ConfirmDeleteModal from '../ConfirmDeleteModal';

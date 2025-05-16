@@ -1,6 +1,7 @@
 // src/pages/ReportsPage.jsx
 
 import React from 'react';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 import { useAuth } from '../contexts/authContext.jsx';
 
 const ReportsPage = () => {

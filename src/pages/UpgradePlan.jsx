@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { Button, Snackbar, Alert } from '@mui/material';
 import '../styles/UpgradePlan.css';
 import { useAuth } from '../contexts/authContext'; // Assuming useAuth is needed here
-function UpgradePlan() {
+ 
+const UpgradePlan = () => {
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
-
+ 
   const handleCloseSnackbar = () => setOpenSnackbar(false);
-
+ 
   return (
     // Mobile Responsiveness: The .upgrade-plan-page class might have padding or max-width rules.
     // Ensure these are responsive. Using Tailwind's p-4 or similar and max-w-md mx-auto could help center

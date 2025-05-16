@@ -8,7 +8,6 @@
     "@emotion/styled": "^11.14.0",
     "@mui/material": "^7.1.0",
     "@stripe/stripe-js": "^7.3.0",
-    "@vitejs/plugin-react": "^4.4.1",
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "firebase": "^10.10.0",
@@ -25,6 +24,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.26.0",
+    "@vitejs/plugin-react": "^4.4.1",
     "eslint": "^9.26.0",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",

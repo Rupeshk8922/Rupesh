@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth'; // Assuming you are using Firebase Auth
-import { doc, setDoc, collection, addDoc } from 'firebase/firestore';
+import { doc, setDoc, collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase/config'; // Assuming db is exported from your config
 
 // Define SignupCompanyPage component
@@ -89,7 +89,7 @@ console.log('Validating Step 1');
       const companyRef = await addDoc(collection(db, 'companies'), {
         name: companyName,
         adminId: adminUser.uid,
-        createdAt: new Date(), // Or use Firestore serverTimestamp()
+        createdAt: serverTimestamp(),
         companyContactNumber: companyContactNumber,
         // Number of Employees is optional, add if you have a field for it
       });
@@ -101,6 +101,7 @@ console.log('Validating Step 1');
       await setDoc(doc(db, 'users', adminUser.uid), {
         companyId: companyId,
         role: 'admin',
+        createdAt: serverTimestamp(),
       });
 
       // 6. Create /companies/{companyId}/users/{uid}
@@ -109,6 +110,7 @@ console.log('Validating Step 1');
         email: adminEmail,
         pocContactNumber: pocContactNumber,
         role: 'admin',
+        createdAt: serverTimestamp(),
       });
 
       // 7. Create blank subscriptions/{companyId} (status: inactive)

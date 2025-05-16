@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 import { getFirestore, collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { firebaseApp } from '../firebase/config';
-import { useAuth } from '../contexts/authContext';
+import { useAuth } from '../contexts/authContext.jsx';
 
 function AddUserPage() {
   const [name, setName] = useState('');

@@ -3,7 +3,7 @@ import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp, collection, updateDoc, query, where, getDocs } from 'firebase/firestore';
 import { auth, db } from '../firebase/config';
 import { useNavigate } from 'react-router-dom';
-
+// Assuming no hooks are imported from src/hooks in this specific file based on the provided code snippet.
 export default function NewCompanyPage() {
   const [formData, setFormData] = useState({
     companyName: '',

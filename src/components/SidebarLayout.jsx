@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/authContext.jsx';
 function SidebarLayout() {
   const { user, userRole } = useAuth(); // Get user and userRole from context
-
+  
   // Define sidebar items with their allowed rolesgit
   const sidebarItems = [
     { label: 'Dashboard', path: '/dashboard', roles: ['admin', 'Manager', 'Outreach Officer', 'Volunteer Coordinator', 'CSR', 'Telecaller'] },
@@ -22,7 +22,7 @@ function SidebarLayout() {
     <div className="w-64 bg-gray-800 text-white">
       {" "}
       {/* Sidebar width and styling */}
-      <div className="p-4 text-xl font-semibold">Empact CRM</div>{" "}
+      <div className="p-4 text-xl font-semibold">Empact CRM</div>{" "}      {/* Conditional rendering based on user role */}
       <nav className="mt-4">
         {/* Conditionally render links based on user role */}
         <ul>

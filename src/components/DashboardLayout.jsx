@@ -1,4 +1,5 @@
 import SidebarLayout from './SidebarLayout.jsx'; // Adjust the path if needed
+// Update import paths for hooks in src/hooks that were renamed from .js to .jsx
 
 function DashboardLayout({ role, children }) {
   const allowedRoles = ['admin', 'outreach', 'csr', 'telecaller', 'volunteer'];

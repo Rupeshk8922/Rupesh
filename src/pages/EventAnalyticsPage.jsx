@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useEvents } from '../hooks/useEvents';
+import { useEvents } from '../hooks/useEvents.jsx';
 import {
   isPast,
   isFuture,

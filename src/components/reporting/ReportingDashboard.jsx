@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useSubscription } from '../../hooks/useSubscription.jsx'; // Assuming this hook exists and is renamed
+import { useFetchSubscriptionStatus } from '../../hooks/useFetchSubscriptionStatus.jsx'; // Assuming this hook exists and is renamed
 
 const ReportingDashboard = () => {
   // Define a basic data structure in comments for Firestore storage

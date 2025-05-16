@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase/config'; // Adjust the path as needed
-import { useauthContext } from '../contexts/authContext'; // Adjust the path and hook name
+import { useauthContext } from '../contexts/authContext.jsx'; // Adjust the path and hook name
 import { useAuth } from '../contexts/authContext';
 
 function VolunteerDetailsPage() {

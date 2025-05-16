@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/authContext';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom'; // Assuming useParams is not a hook you renamed
 
 function OutreachContactDetails() {
   const { contactId } = useParams();

@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../contexts/authContext";
 import { useCompanyLogin } from "../hooks/useCompanyLogin"; // Import useCompanyLogin
-import useModal from '../hooks/useModal'; // Assuming you still need this
-const LoginPage = () => {
+import useModal from '../hooks/useModal.jsx'; // Assuming you still need this
+ const LoginPage = () => {
   const navigate = useNavigate();
   // Use user and loading from useauthContext for initial auth check
   const { user, loading } = useAuth();

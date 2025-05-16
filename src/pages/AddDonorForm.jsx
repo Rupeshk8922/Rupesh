@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { TextField, Button, Container, Typography, Box } from '@mui/material';
 import { styled } from '@mui/system';
-import { collection, addDoc } from 'firebase/firestore'; // Import collection and addDoc here
+import { collection, addDoc } from 'firebase/firestore';
 import { db } from '../firebase/config'; // Import the initialized Firebase app instance
 
 const FormContainer = styled(Container)({

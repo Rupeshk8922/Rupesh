@@ -1,6 +1,7 @@
 import { Navigate } from "react-router-dom";
 import { useSubscription } from "../contexts/SubscriptionContext";
 import NoAccessPage from "../pages/NoAccessPage"; // Adjust the path as needed\nimport { useAuth } from "../contexts/authContext.jsx"; // Corrected import of useAuth\n
+
 import { useState, useEffect } from "react"; // Import useState and useEffect
 const ProtectedRoute = ({ children, requiredRole, requiredSubscription }) => {const { currentUser, userRole, authIsReady } = useAuth(); // Get currentUser, userRole, and authIsReady from useAuthContext
   const { subscriptionStatus, subscriptionLoading } = useSubscription(); // Get subscriptionStatus and loading state

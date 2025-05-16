@@ -3,7 +3,7 @@ import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-
 
 import { useAuth } from './contexts/authContext.jsx'; // Changed import to useAuth
 import { SubscriptionProvider } from './contexts/SubscriptionContext.jsx'; // Keep SubscriptionProvider import
-// Assuming useFetchCompanyData is in hooks/useFetchCompanyData.js or .jsx
+import { useFetchCompanyData } from './hooks/useFetchCompanyData.jsx';
 // Import your page components
 import LoginPage from './pages/LoginPage'; // Assuming LoginPage is in pages
 // Placeholder routes for signup pages - Replace with actual components

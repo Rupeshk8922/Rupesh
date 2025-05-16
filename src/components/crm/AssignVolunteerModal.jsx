@@ -1,13 +1,20 @@
 import { useState, useEffect } from 'react';
-import { collection, query, where, getDocs, doc, updateDoc } from 'firebase/firestore';
-import { db } from '../../firebase/config'; // Import your Firestore instance
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  doc,
+  updateDoc,
+} from 'firebase/firestore';
+import { db } from '../../firebase/config'; // Adjust path if needed
 
 const AssignVolunteerModal = ({ isOpen, onClose, volunteerId }) => {
   const [availableEvents, setAvailableEvents] = useState([]);
   const [selectedEventId, setSelectedEventId] = useState('');
-  const [loading, setLoading] = useState(false); // State for loading indicator
-  const [error, setError] = useState(null); // State for error messages
-  const [success, setSuccess] = useState(false); // State for success message
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -16,10 +23,12 @@ const AssignVolunteerModal = ({ isOpen, onClose, volunteerId }) => {
         setError(null);
         try {
           const eventsCollectionRef = collection(db, 'events');
-          // Fetch events that are not completed, you might add other filters
           const q = query(eventsCollectionRef, where('status', '!=', 'completed'));
           const querySnapshot = await getDocs(q);
-          const eventsList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          const eventsList = querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
           setAvailableEvents(eventsList);
         } catch (err) {
           setError('Failed to fetch available events.');
@@ -30,14 +39,13 @@ const AssignVolunteerModal = ({ isOpen, onClose, volunteerId }) => {
       };
 
       fetchAvailableEvents();
-      // Reset selected event and messages when modal opens
       setSelectedEventId('');
       setError(null);
       setSuccess(false);
     }
-  }, [isOpen]); // Fetch events when the modal opens
+  }, [isOpen]);
 
-  const handleAssignButtonClick = async () => {
+  const handleAssign = async () => {
     if (!selectedEventId) {
       setError('Please select an event to assign.');
       return;
@@ -48,29 +56,18 @@ const AssignVolunteerModal = ({ isOpen, onClose, volunteerId }) => {
     setSuccess(false);
 
     try {
-      // Update the volunteer document to assign the event
       const volunteerDocRef = doc(db, 'volunteers', volunteerId);
       await updateDoc(volunteerDocRef, {
         assignedEvent: selectedEventId,
-        // You might want to add other fields here, like assignedAt, etc.
       });
 
-      // Alternatively, update the event document to add the volunteer
-      // import { arrayUnion } from 'firebase/firestore';
-      // const eventDocRef = doc(db, 'events', selectedEventId);
-      // await updateDoc(eventDocRef, {
-      //   assignedVolunteers: arrayUnion(volunteerId)
-      // });
-
-
       setSuccess(true);
-      // Optionally close the modal after a short delay to show the success message
       setTimeout(() => {
         onClose();
       }, 1500);
     } catch (err) {
       setError('Failed to assign volunteer to event.');
-      console.error('Error assigning volunteer to event:', err);
+      console.error('Error assigning volunteer:', err);
     } finally {
       setLoading(false);
     }
@@ -82,10 +79,10 @@ const AssignVolunteerModal = ({ isOpen, onClose, volunteerId }) => {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded shadow-lg max-w-sm w-full">
         <h2 className="text-lg font-bold mb-4">Assign Volunteer to Event</h2>
-        <p>Assigning Volunteer ID: {volunteerId}</p>
+        <p className="text-sm text-gray-600 mb-2">Volunteer ID: {volunteerId}</p>
 
         <div className="my-4">
-          <p>Select an event to assign this volunteer to:</p>
+          <p className="mb-2">Select an event:</p>
           {loading && <p>Loading events...</p>}
           {error && <p className="text-red-500">{error}</p>}
           {!loading && !error && (
@@ -96,21 +93,31 @@ const AssignVolunteerModal = ({ isOpen, onClose, volunteerId }) => {
               disabled={loading}
             >
               <option value="">-- Select Event --</option>
-              {availableEvents.map(event => (
-                <option key={event.id} value={event.id}>{event.name || event.title}</option> // Display name or title
+              {availableEvents.map((event) => (
+                <option key={event.id} value={event.id}>
+                  {event.name || event.title || 'Untitled Event'}
+                </option>
               ))}
             </select>
           )}
         </div>
 
-        {success && <p className="text-green-500 mb-4">Volunteer assigned successfully!</p>}
+        {success && (
+          <p className="text-green-600 text-sm mb-4">
+            Volunteer assigned successfully!
+          </p>
+        )}
 
         <div className="mt-6 flex justify-end">
-          <button onClick={onClose} className="mr-2 px-4 py-2 rounded border" disabled={loading}>
+          <button
+            onClick={onClose}
+            className="mr-2 px-4 py-2 rounded border border-gray-300 hover:bg-gray-100"
+            disabled={loading}
+          >
             Cancel
           </button>
           <button
-            onClick={handleAssignButtonClick}
+            onClick={handleAssign}
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
             disabled={!selectedEventId || loading}
           >

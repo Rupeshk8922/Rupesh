@@ -5,8 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import { deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../contexts/authContext';
-import useOutreachContacts from '../hooks/useOutreachContacts';
-import useCompanyUsers from '../hooks/useCompanyUsers';
+import useOutreachContacts from '../hooks/useOutreachContacts.jsx';
+import useCompanyUsers from '../hooks/useCompanyUsers.jsx';
 
 const OutreachContactsList = () => {
   const { companyId } = useAuth();

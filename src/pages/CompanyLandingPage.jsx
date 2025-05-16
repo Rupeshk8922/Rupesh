@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFetchCompanyData } from '../hooks/useFetchCompanyData';
 import { useAuth } from '../contexts/authContext';
-
+ 
 function CompanyLandingPage() {
   const { companyData, loading, error } = useFetchCompanyData();
   const navigate = useNavigate();

@@ -1,6 +1,5 @@
 import React from 'react'; // Assuming React is necessary for JSX
 import { useNavigate } from 'react-router-dom'; // Assuming react-router-dom is used for navigation
-import { useAuth } from '../contexts/authContext.jsx';
 
 const SignupChoicePage = () => {
   const navigate = useNavigate();

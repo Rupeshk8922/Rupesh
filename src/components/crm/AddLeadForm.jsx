@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { collection, addDoc } from 'firebase/firestore';
-import { db } from '../../firebase/config';
+import { db } from '../../firebase/config.js';
 import { useAuth } from '../../contexts/authContext';
 
 const predefinedInterests = ['Event', 'Volunteer', 'Donation', 'General Inquiry'];

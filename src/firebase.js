@@ -9,13 +9,15 @@ import {
   deleteDoc,
 } from 'firebase/firestore';
 
-import { db } from './firebase/config';
+import { db } from './firebase/config.js';
 import {
   ref,
   uploadBytes,
   getDownloadURL,
   deleteObject,
 } from 'firebase/storage';
+
+export { db };
 
 // Firestore helpers using modular API
 export async function getCollection(collectionName) {

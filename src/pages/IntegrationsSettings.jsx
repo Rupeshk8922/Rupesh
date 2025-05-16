@@ -1,5 +1,5 @@
 jsx
-import React, { useState } from 'react'; // eslint-disable-line no-unused-vars
+import React, { useState } from 'react';
 
 // This component is for displaying and managing integration settings.
 const IntegrationsSettings = () => {

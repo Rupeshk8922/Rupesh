@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { collection, addDoc } from 'firebase/firestore';
 import { db } from '../../firebase/config'; // Adjust the path as needed
 import { useauthContext } from '../../contexts/authContext'; // Adjust the path as needed
-import { useAuth } from '../../contexts/authContext'; // Adjust the path as needed
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useAuth } from '../../contexts/authContext.jsx'; // Adjust the path as needed
 // Ensure userRole is available
 function AddLeadForm() {
   const { companyId } = useAuth();

@@ -1,7 +1,7 @@
 import React from 'react';
 
-// Assuming VolunteerDashboard might need authentication status
-import { useAuth } from '../../../contexts/authContext.jsx'; 
+// Assuming CSRDashboard might need authentication status
+import { useAuth } from '../../../contexts/authContext.jsx';
 
 const VolunteerDashboard = () => {
   return (

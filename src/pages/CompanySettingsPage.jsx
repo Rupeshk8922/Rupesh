@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { useAuth } from '../contexts/authContext'; // Corrected import path and hook
-
+import { useFetchCompanyData } from '../hooks/useFetchCompanyData.jsx';
 function CompanySettingsPage() {
   const [loading, setLoading] = useState(true);
   const [companyData, setCompanyData] = useState(null);

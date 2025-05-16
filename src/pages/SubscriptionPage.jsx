@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSubscription } from '../contexts/SubscriptionContext';
 
 // ⬆️ TOP OF THE FILE
-import { loadStripe } from '@stripe/stripe-js';
+import { loadStripe } from '@stripe/stripe-js'
 import { httpsCallable } from 'firebase/functions'; // Corrected import for functions
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 function SubscriptionPage() {
