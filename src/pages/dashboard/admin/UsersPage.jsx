@@ -2,11 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { collection, getDocs, doc, deleteDoc } from 'firebase/firestore';
 import { db } from '../../../firebase/config'; // Adjust the path as needed
 import { useauthContext } from '../../../context/authContext'; // Changed import here
-import { useAuth } from '../../../contexts/authContext.jsx'; // Changed import here
+import { useAuth } from '../../../contexts/authContext.jsx';
 
 function UsersPage() {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+    const [users, setUsers] = useState([]); // Add state for users
   const { user } = useAuth(); // Get the logged-in user
     const fetchUsers = async () => {
       if (!companyId) {
