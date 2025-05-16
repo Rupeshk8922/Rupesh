@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { useAuth } from '../contexts/authContext'; // Corrected hook name and casing
+import { useAuth } from '../contexts/authContext';
 import useFetchSubscriptionStatus from '../hooks/useFetchSubscriptionStatus';
-
 import OutreachModule from '../components/crm/OutreachModule';
 import LeadsModule from '../components/crm/LeadsModule';
 import EventsModule from '../components/crm/EventsModule';
