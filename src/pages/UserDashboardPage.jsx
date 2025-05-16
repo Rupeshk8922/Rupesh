@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { useAuth } from '../contexts/authContext';
+// Current file path: src/pages/UserDashboardPage.jsx
+import { useAuth } from '../contexts/authContext'; // Corrected import
 import useFetchSubscriptionStatus from '../hooks/useFetchSubscriptionStatus';
 import OutreachModule from '../components/crm/OutreachModule';
 import LeadsModule from '../components/crm/LeadsModule';
