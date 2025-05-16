@@ -2,8 +2,8 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { doc, deleteDoc } from 'firebase/firestore';
 import { db } from '../../firebase/config';
-import { useauthContext } from '../../contexts/authContext';
-import useVolunteers from '../../hooks/useVolunteers'; // Assuming this hook is correctly implemented
+import { useAuth } from '../../contexts/authContext';
+import useVolunteers from '../../hooks/useVolunteers'; 
 
 // Predefined options for filters and roles
 const ROLES = {
@@ -20,13 +20,13 @@ const INTEREST_OPTIONS = ['Education', 'Health', 'Environment', 'Community Suppo
 const STATUS_OPTIONS = ['Active', 'Inactive', 'On Leave']; // Added 'On Leave' from EditUserPage
 
 const DEFAULT_INTEREST_ICON = '✨'; // Default icon for interests
-const TOP_VOLUNTEER_THRESHOLD = 5; // Define threshold for top volunteer
-import AssignVolunteerModal from '../AssignVolunteerModal'; // Corrected import path
+const TOP_VOLUNTEER_THRESHOLD = 5; 
+import AssignVolunteerModal from '../AssignVolunteerModal'; 
 import ConfirmDeleteModal from '@/components/ConfirmDeleteModal';
 
 const VolunteersList = () => {
   const navigate = useNavigate();
-  const { userRole, companyId } = useauthContext(); // Assuming useauthContext provides userRole and companyId
+  const { userRole, companyId } = useAuth(); // Get userRole and companyId from useAuth
   const { volunteers, loading, error } = useVolunteers(); // Assuming this hook is correctly implemented
 
   const [filters, setFilters] = useState({

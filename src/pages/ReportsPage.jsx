@@ -1,9 +1,7 @@
 // src/pages/ReportsPage.jsx
 
 import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { useAuth } from '../contexts/authContext.jsx';
-// Removed duplicate import for useauthContext
 
 const ReportsPage = () => {
   // Placeholder data

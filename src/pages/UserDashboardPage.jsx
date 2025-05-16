@@ -10,7 +10,7 @@ import AIAssistant from '../components/AIAssistant';
 import MapsAndTracking from '../components/MapsAndTracking';
 
 function UserDashboardPage() {
-  const { user, company } = useauthContext(); // Get user and company from context
+  const { user, company } = useAuth(); // Get user and company from context
   const { subscriptionStatus } = useFetchSubscriptionStatus(user?.companyId); // Get subscription status
 
   const isSubscriptionActive = subscriptionStatus?.status === 'active';

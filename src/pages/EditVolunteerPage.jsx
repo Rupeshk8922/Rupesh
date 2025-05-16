@@ -4,9 +4,7 @@ import { doc, getDoc, updateDoc, collection, query, getDocs } from 'firebase/fir
 import { db } from '../firebase/config'; // Firestore config
 import { useAuth } from '../contexts/authContext'; // Custom Auth Context - Normalized import
 
-// Corrected import path for auth context
   const { volunteerId } = useParams(); // Get volunteerId from URL
-  const { companyId, userRole } = useauthContext(); // Auth context
   const navigate = useNavigate();
 
   // State for form data

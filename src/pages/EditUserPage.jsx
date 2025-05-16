@@ -3,11 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase/config'; // Firestore config
 
-import { useAuth } from '../contexts/authContext'; // Corrected hook name and path
-
+import { useAuth } from '../../contexts/authContext';
 function EditUserPage() {
   const { userId } = useParams(); // Get userId from URL
-  const { currentUser, companyId, userRole } = useauthContext(); // Auth context
+  const { currentUser, companyId, userRole } = useAuth(); // Auth context
   const navigate = useNavigate();
 
   const [name, setName] = useState('');

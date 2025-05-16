@@ -4,18 +4,19 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../firebase';
-import { useauthContext} from '../contexts/authContext';
-import useOutreachContacts from '../../hooks/useOutreachContacts';
-import useCompanyUsers from '../../hooks/useCompanyUsers';
+import { useAuth } from '../contexts/authContext';
+import useOutreachContacts from '../hooks/useOutreachContacts';
+import useCompanyUsers from '../hooks/useCompanyUsers';
 
 const OutreachContactsList = () => {
-  const { contacts, loading, error, hasMore, fetchMore, loadingMore } = useOutreachContacts();
-  const { users, loading: usersLoading, error: usersError } = useCompanyUsers();
-  const { companyId } = useauthContext();
+  const { companyId } = useAuth();
   const navigate = useNavigate();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filterTag, setFilterTag] = useState('');
+
+  const { contacts, loading, error, hasMore, fetchMore, loadingMore } = useOutreachContacts(companyId);
+  const { users, usersLoading, usersError } = useCompanyUsers(companyId);
 
   const handleFilterChange = (e) => setFilterTag(e.target.value);
   const handleSearchChange = (e) => setSearchTerm(e.target.value);
@@ -29,7 +30,6 @@ const OutreachContactsList = () => {
     }
   };
 
-  // Filter & search on client side (consider server-side for large data)
   const searchedContacts = searchTerm
     ? contacts?.filter(contact =>
         [contact.name, contact.email, contact.company, contact.title]

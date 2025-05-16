@@ -1,14 +1,13 @@
 import { useState } from 'react';
 import { collection, addDoc } from 'firebase/firestore';
 import { db } from '../../firebase/config';
-// import { useauthContext } from '../../contexts/authContext'; // Correct import - Placeholder for now
+import { useAuth } from '../../contexts/authContext';
 
 const predefinedInterests = ['Event', 'Volunteer', 'Donation', 'General Inquiry'];
 const predefinedStatuses = ['New', 'Contacted', 'Qualified', 'Lost', 'Converted'];
 
 const AddLeadForm = () => {
-  // const { user } = useauthContext(); // Placeholder for now
-  const user = { companyId: 'your_company_id' }; // Placeholder user with companyId
+  const { user } = useAuth();
 
   // State for validation errors
   const [nameError, setNameError] = useState('');

@@ -3,13 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useauthContext } from '../contexts/authContext';
-import { useAuth } from '../contexts/authContext'; // Correct import
+import { useAuth } from '../contexts/authContext';
 
 function EditOutreachContactPage() {
   const { contactId } = useParams();
   const navigate = useNavigate();
   const { user, companyId } = useAuth(); // Use useAuth hook
-
   const [formData, setFormData] = useState({
     name: '',
     phone: '',

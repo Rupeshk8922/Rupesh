@@ -1,237 +1,270 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { collection, addDoc } from 'firebase/firestore';
-import { useNavigate } from 'react-router-dom';
-import { db } from '../../firebase/config';
-import { useauthContext } from '../../contexts/authContext';
+import { db } from '../../firebase/config'; // Adjust path if needed
+import { useAuth } from '../../contexts/authContext'; // Correct import
+
 function AddEventForm() {
   const [formData, setFormData] = useState({
-    title: '',
-    date: '',
-    time: '',
-    location: '',
-    description: '',
-    assignedTo: '',
+    name: '',
     eventType: '',
-    maxVolunteers: '',
+    date: '',
+    description: '',
+    location: '',
+    volunteerCapacity: '',
   });
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [successMessage, setSuccessMessage] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [eventCreationStatus, setEventCreationStatus] = useState(null); // null, 'success', or 'error'
 
-  const [titleError, setTitleError] = useState('');
-  const [dateError, setDateError] = useState('');
-  const [timeError, setTimeError] = useState('');
-  const [locationError, setLocationError] = useState('');
-  const [descriptionError, setDescriptionError] = useState('');
-  const [assignedToError, setAssignedToError] = useState('');
+  // Error states for validation
+  const [nameError, setNameError] = useState('');
   const [eventTypeError, setEventTypeError] = useState('');
-  const [maxVolunteersError, setMaxVolunteersError] = useState('');
+  const [dateError, setDateError] = useState('');
+  const [locationError, setLocationError] = useState('');
+  const [volunteerCapacityError, setVolunteerCapacityError] = useState('');
+  const [descriptionError, setDescriptionError] = useState('');
 
-  const navigate = useNavigate();
-  const { user } = useauthContext();
-  const companyId = user?.companyId;
+  const { user } = useAuth(); // Get current user from Auth context
 
-  if (!companyId) {
-    return <div style={{ padding: '2rem', color: 'red' }}>Company ID is missing. Cannot add event.</div>;
-  }
+  // Assuming companyId is stored in user metadata or claims, adjust if different
+  // Example: user?.companyId or user?.claims?.companyId depending on your setup
+  // Here we'll just assume user.uid as companyId for demonstration; adjust as needed
+  const companyId = user?.uid || null;
 
-  // Validation Functions
-  const validateTitle = (title) => (!title.trim() ? 'Event Title is required' : '');
+  // Validation functions
+  const validateName = (name) => {
+    if (name.trim() === '') return 'Event name is required.';
+    return '';
+  };
+
+  const validateEventType = (eventType) => {
+    if (eventType === '') return 'Event type is required.';
+    return '';
+  };
+
   const validateDate = (date) => {
-    if (!date) return 'Date is required';
+    if (!date) return 'Event date is required.';
     const selectedDate = new Date(date);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    return selectedDate < today ? 'Date must be in the future' : '';
-  };
-  const validateTime = (time) => {
-    if (!time.trim()) return 'Time is required';
-    return !/^([01]\d|2[0-3]):([0-5]\d)$/.test(time) ? 'Invalid time format (use HH:MM)' : '';
-  };
-  const validateLocation = (location) => (!location.trim() ? 'Location is required' : '');
-  const validateDescription = (desc) => (desc.length > 500 ? 'Description cannot exceed 500 characters' : '');
-  const validateEventType = (type) => (!type.trim() ? 'Event Type is required' : '');
-  const validateAssignedTo = () => ''; // Optional
-  const validateMaxVolunteers = (value) => {
-    return value !== '' && (isNaN(value) || parseInt(value) < 0)
-      ? 'Max Volunteers must be a non-negative number'
-      : '';
+    if (selectedDate < today) return 'Please select a valid future date.';
+    return '';
   };
 
-  const validateField = (name, value) => {
-    switch (name) {
-      case 'title': return validateTitle(value);
-      case 'date': return validateDate(value);
-      case 'time': return validateTime(value);
-      case 'location': return validateLocation(value);
-      case 'description': return validateDescription(value);
-      case 'assignedTo': return validateAssignedTo(value);
-      case 'eventType': return validateEventType(value);
-      case 'maxVolunteers': return validateMaxVolunteers(value);
-      default: return '';
-    }
+  const validateLocation = (location) => {
+    if (location.trim() === '') return 'Location is required.';
+    return '';
+  };
+
+  const validateVolunteerCapacity = (capacity) => {
+    if (capacity === '' || capacity === null) return '';
+    const num = Number(capacity);
+    if (!Number.isInteger(num) || num < 1) return 'Enter a valid positive number for volunteer capacity.';
+    return '';
+  };
+
+  const validateDescription = (description) => {
+    if (description && description.length > 300) return 'Description must be under 300 characters.';
+    return '';
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prevState) => ({
-      ...prevState,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
 
-    // Live validation
-    const fieldError = validateField(name, value);
+    // Clear errors on change for better UX
     switch (name) {
-      case 'title': setTitleError(fieldError); break;
-      case 'date': setDateError(fieldError); break;
-      case 'time': setTimeError(fieldError); break;
-      case 'location': setLocationError(fieldError); break;
-      case 'description': setDescriptionError(fieldError); break;
-      case 'assignedTo': setAssignedToError(fieldError); break;
-      case 'eventType': setEventTypeError(fieldError); break;
-      case 'maxVolunteers': setMaxVolunteersError(fieldError); break;
-      default: break;
+      case 'name':
+        setNameError('');
+        break;
+      case 'eventType':
+        setEventTypeError('');
+        break;
+      case 'date':
+        setDateError('');
+        break;
+      case 'location':
+        setLocationError('');
+        break;
+      case 'volunteerCapacity':
+        setVolunteerCapacityError('');
+        break;
+      case 'description':
+        setDescriptionError('');
+        break;
+      default:
+        break;
     }
+  };
+
+  const validateForm = () => {
+    const nameErr = validateName(formData.name);
+    const eventTypeErr = validateEventType(formData.eventType);
+    const dateErr = validateDate(formData.date);
+    const locationErr = validateLocation(formData.location);
+    const volunteerCapacityErr = validateVolunteerCapacity(formData.volunteerCapacity);
+    const descriptionErr = validateDescription(formData.description);
+
+    setNameError(nameErr);
+    setEventTypeError(eventTypeErr);
+    setDateError(dateErr);
+    setLocationError(locationErr);
+    setVolunteerCapacityError(volunteerCapacityErr);
+    setDescriptionError(descriptionErr);
+
+    return !(nameErr || eventTypeErr || dateErr || locationErr || volunteerCapacityErr || descriptionErr);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(null);
-    setSuccessMessage(null);
 
-    const newErrors = {
-      titleError: validateTitle(formData.title),
-      dateError: validateDate(formData.date),
-      timeError: validateTime(formData.time),
-      locationError: validateLocation(formData.location),
-      descriptionError: validateDescription(formData.description),
-      assignedToError: validateAssignedTo(formData.assignedTo),
-      eventTypeError: validateEventType(formData.eventType),
-      maxVolunteersError: validateMaxVolunteers(formData.maxVolunteers),
-    };
+    if (!validateForm()) return;
 
-    const hasErrors = Object.values(newErrors).some((error) => error !== '');
-    if (hasErrors) {
-      setTitleError(newErrors.titleError);
-      setDateError(newErrors.dateError);
-      setTimeError(newErrors.timeError);
-      setLocationError(newErrors.locationError);
-      setDescriptionError(newErrors.descriptionError);
-      setAssignedToError(newErrors.assignedToError);
-      setEventTypeError(newErrors.eventTypeError);
-      setMaxVolunteersError(newErrors.maxVolunteersError);
-      setError('Please fix the errors above.');
+    if (!companyId) {
+      console.error('Company ID is not available.');
+      setEventCreationStatus('error');
       return;
     }
 
-    setLoading(true);
+    setIsLoading(true);
+    setEventCreationStatus(null);
+
     try {
       const eventsCollectionRef = collection(db, 'data', companyId, 'events');
       await addDoc(eventsCollectionRef, {
         ...formData,
-        createdAt: new Date(),
+        volunteerCapacity: formData.volunteerCapacity ? Number(formData.volunteerCapacity) : null,
       });
 
-      setSuccessMessage('Event added successfully!');
+      setEventCreationStatus('success');
       setFormData({
-        title: '',
-        date: '',
-        time: '',
-        location: '',
-        description: '',
-        assignedTo: '',
+        name: '',
         eventType: '',
-        maxVolunteers: '',
+        date: '',
+        description: '',
+        location: '',
+        volunteerCapacity: '',
       });
 
-      setTitleError('');
-      setDateError('');
-      setTimeError('');
-      setLocationError('');
-      setDescriptionError('');
-      setAssignedToError('');
+      // Clear errors on success
+      setNameError('');
       setEventTypeError('');
-      setMaxVolunteersError('');
-
-      navigate('/events');
-    } catch (err) {
-      setError(err.message || 'Failed to add event. Please try again.');
+      setDateError('');
+      setLocationError('');
+      setVolunteerCapacityError('');
+      setDescriptionError('');
+    } catch (error) {
+      console.error('Error adding event:', error);
+      setEventCreationStatus('error');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  return (
-    // Added padding for smaller screens and a max width for larger screens for better readability
-    // flex and justify-center are used to center the form on larger screens
-    <div className="p-4 flex justify-center">
-      {/* Added a container with max-width for the form on larger screens */}
-      <div className="w-full max-w-lg">
-      <h2 className="text-xl font-bold mb-4">Add New Event</h2>
-      {/* Adjusted error and success message styling for better visibility */}
-      {error && <p className="text-red-600">{error}</p>}
-      {successMessage && <p className="text-green-600">{successMessage}</p>}
+  const eventTypes = ['Webinar', 'Fundraiser', 'Awareness Campaign'];
 
-      <form className="space-y-4" onSubmit={handleSubmit}>
-        <InputField label="Event Title" name="title" value={formData.title} error={titleError} onChange={handleChange} />
-        <InputField label="Date" name="date" type="date" value={formData.date} error={dateError} onChange={handleChange} />
-        <InputField label="Time" name="time" placeholder="HH:MM" value={formData.time} error={timeError} onChange={handleChange} />
-        <InputField label="Location" name="location" value={formData.location} error={locationError} onChange={handleChange} />
-        <TextAreaField label="Description" name="description" value={formData.description} error={descriptionError} onChange={handleChange} />
-        <InputField label="Event Type" name="eventType" value={formData.eventType} error={eventTypeError} onChange={handleChange} />
-        <InputField label="Assigned To" name="assignedTo" value={formData.assignedTo} error={assignedToError} onChange={handleChange} />
-        <InputField label="Max Volunteers" name="maxVolunteers" type="number" value={formData.maxVolunteers} error={maxVolunteersError} onChange={handleChange} />
+  return (
+    <div className="p-6 bg-white rounded-lg shadow-md max-w-md mx-auto">
+      <h2 className="text-2xl font-bold mb-4 text-center">Add New Event</h2>
+
+      {eventCreationStatus === 'success' && (
+        <p className="text-green-600 mb-4">Event added successfully!</p>
+      )}
+      {eventCreationStatus === 'error' && (
+        <p className="text-red-500 mb-4">Error adding event. Please try again.</p>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Event Name</label>
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            onBlur={() => setNameError(validateName(formData.name))}
+            className={`mt-1 block w-full border ${nameError ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm p-2`}
+          />
+          {nameError && <p className="text-red-500 text-sm mt-1">{nameError}</p>}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Event Type</label>
+          <select
+            name="eventType"
+            value={formData.eventType}
+            onChange={handleChange}
+            onBlur={() => setEventTypeError(validateEventType(formData.eventType))}
+            className={`mt-1 block w-full border ${eventTypeError ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm p-2`}
+          >
+            <option value="">Select Event Type</option>
+            {eventTypes.map((type) => (
+              <option key={type} value={type}>{type}</option>
+            ))}
+          </select>
+          {eventTypeError && <p className="text-red-500 text-sm mt-1">{eventTypeError}</p>}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Date</label>
+          <input
+            type="date"
+            name="date"
+            value={formData.date}
+            onChange={handleChange}
+            onBlur={() => setDateError(validateDate(formData.date))}
+            className={`mt-1 block w-full border ${dateError ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm p-2`}
+          />
+          {dateError && <p className="text-red-500 text-sm mt-1">{dateError}</p>}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Location</label>
+          <input
+            type="text"
+            name="location"
+            value={formData.location}
+            onChange={handleChange}
+            onBlur={() => setLocationError(validateLocation(formData.location))}
+            className={`mt-1 block w-full border ${locationError ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm p-2`}
+          />
+          {locationError && <p className="text-red-500 text-sm mt-1">{locationError}</p>}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Description (Optional)</label>
+          <textarea
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            onBlur={() => setDescriptionError(validateDescription(formData.description))}
+            className={`mt-1 block w-full border ${descriptionError ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm p-2`}
+          />
+          {descriptionError && <p className="text-red-500 text-sm mt-1">{descriptionError}</p>}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Volunteer Capacity (Optional)</label>
+          <input
+            type="number"
+            name="volunteerCapacity"
+            value={formData.volunteerCapacity}
+            onChange={handleChange}
+            onBlur={() => setVolunteerCapacityError(validateVolunteerCapacity(formData.volunteerCapacity))}
+            className={`mt-1 block w-full border ${volunteerCapacityError ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm p-2`}
+            min="1"
+          />
+          {volunteerCapacityError && <p className="text-red-500 text-sm mt-1">{volunteerCapacityError}</p>}
+        </div>
 
         <button
           type="submit"
-          disabled={loading}
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          disabled={isLoading}
+          className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
-          {loading ? 'Adding...' : 'Add Event'}
+          {isLoading ? 'Saving...' : 'Save Event'}
         </button>
       </form>
-      </div> {/* End of max-w-lg container */}
-    </div>
-  );
-}
-
-// Reusable input field
-function InputField({ label, name, value, onChange, error, type = 'text', placeholder }) {
-  return (
-    <div>
-      <label htmlFor={name} className="block font-medium">{label}</label>
-      <input
-        // w-full ensures the input takes the full width of its container on all screen sizes
-        type={type}
-        id={name}
-        name={name}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        // Added responsive padding and border styling
-        className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-      />
-      {error && <p className="text-red-500 text-sm">{error}</p>}
-    </div>
-  );
-}
-
-// Reusable textarea field
-function TextAreaField({ label, name, value, onChange, error }) {
-  return (
-    <div>
-      <label htmlFor={name} className="block font-medium">{label}</label>
-      <textarea
-        // w-full ensures the textarea takes the full width of its container on all screen sizes
-        id={name}
-        name={name}
-        value={value}
-        // Added responsive padding and border styling
-        onChange={onChange}
-        className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-      />
-      {error && <p className="text-red-500 text-sm">{error}</p>}
     </div>
   );
 }

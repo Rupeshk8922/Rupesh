@@ -1,9 +1,7 @@
 import { useState } from 'react';
 import { db } from '../firebase/config'; // Assuming your firebase config is here
 import { collection, addDoc, Timestamp } from 'firebase/firestore';
-import { useauthContext } from '../contexts/authContext'; // Assuming your authContext is here
-import { useAuth } from '../contexts/authContext.jsx'; // Assuming your authContext is here
-
+import { useAuth } from '../contexts/authContext'; // Assuming your authContext is here
 const VolunteerForm = ({ onSubmit }) => {
   const [formData, setFormData] = useState({
     name: '',

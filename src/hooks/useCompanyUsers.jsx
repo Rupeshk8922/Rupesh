@@ -2,9 +2,8 @@ import { useState, useEffect } from 'react';
 import { db } from '../firebase'; // Your Firebase initialization
 import { collection, query, onSnapshot } from 'firebase/firestore';
 import { useauthContext } from '../contexts/authContext';
-import { useAuth } from '../contexts/authContext.jsx';
 
-const useCompanyUsers = () => {const { currentUser, companyId } = useAuth();
+const useCompanyUsers = () => {const { currentUser, companyId } = useauthContext();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

@@ -6,20 +6,16 @@ import { FaCalendarAlt, FaTag, FaMapMarkerAlt, FaUsers, FaCircle, FaSquare } fro
 import { FaSortAlphaUp, FaSortNumericUp, FaArrowUp, FaArrowDown } from 'react-icons/fa';
 import { db } from '../../firebase/config';
 import { MdOutlineEventNote } from 'react-icons/md'; // Fix: Remove extra space in comment block
-import { useauthContext } from '../../contexts/authContext';
 import ConfirmDeleteModal from '../ConfirmDeleteModal';
+import { useAuth } from '../../contexts/authContext';
 
 const EventsList = () => { // Added function wrapper for the component
-  const { companyId } = useauthContext();
+ const { companyId, user, userRole } = useAuth();
   const navigate = useNavigate();
- 
   const [filterDateRange, setFilterDateRange] = useState('all');
   const [filterLocation, setFilterLocation] = useState('');
   const [filterVolunteerCapacity, setFilterVolunteerCapacity] = useState('');
   const [filterType, setFilterType] = useState(''); // Initialize filterType state
-  const { events, loading, error } = useEvents();
-  const [currentView, setCurrentView] = useState('table');
-  const { user, userRole } = useauthContext();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const handleMarkCompleted = async (eventId) => {
@@ -44,10 +40,12 @@ const EventsList = () => { // Added function wrapper for the component
     CSR: 'CSR', // Added CSR role based on usage below
     OUTREACH_OFFICER: 'Outreach Officer', // Added Outreach Officer role based on usage below
   };
+  const { events, loading, error } = useEvents();
 
   const [eventToDeleteId, setEventToDeleteId] = useState(null);
   const [eventToDeleteTitle, setEventToDeleteTitle] = useState('');
 
+  const [currentView, setCurrentView] = useState('table');
   const [sortBy, setSortBy] = useState('date');
   const [sortOrder, setSortOrder] = useState('asc');
 

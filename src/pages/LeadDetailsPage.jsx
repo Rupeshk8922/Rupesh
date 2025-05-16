@@ -2,18 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { doc, getDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
-import { useauthContext } from '../contexts/authContext';
 import { useAuth } from '../contexts/authContext.jsx';
+
 const LeadDetailsPage = () => {
   const { leadId } = useParams();
-  const navigate = useNavigate();
-  const { user, loading: authLoading } = useAuth(); // Use useauthContext correctly and get user and authLoading
+  const { user, loading: authLoading } = useAuth(); // Use useAuth correctly and get user and authLoading
   const companyId = user?.companyId; // Access companyId from user object
   const userRole = user?.role; // Access userRole from user object  const [lead, setLead] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const allowedRoles = ['admin', 'Manager', 'Outreach Officer'];
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Check permissions before fetching

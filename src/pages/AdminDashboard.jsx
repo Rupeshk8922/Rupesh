@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../firebase/config';
 import { collection, query, where, getDocs, updateDoc, doc, getDoc } from 'firebase/firestore';
 import { useAuth } from '../contexts/authContext';
-import { useAuth } from '../contexts/authContext.jsx';
 function AdminDashboard() {
   const { user, userRole } = useAuth();
   const [users, setUsers] = useState([]);

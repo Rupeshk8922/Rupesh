@@ -3,16 +3,18 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase/config'; // Adjust the path as needed
 import { useauthContext } from '../contexts/authContext'; // Adjust the path and hook name
-import { useAuth } from '../contexts/authContext'; // Import useAuth - Normalized import
+import { useAuth } from '../contexts/authContext';
+
 function VolunteerDetailsPage() {
   const { volunteerId } = useParams(); // Get volunteerId from URL
-  const { companyId, userRole } = useAuth(); // Auth context - Corrected hook
+  // const { companyId, userRole } = useAuth(); // Auth context - Corrected hook
+  const { user, loading, companyId, userRole } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState(null);
 
   const handleDelete = async () => {
     try {
-      const volunteerDocRef = doc(db, 'data', companyId, 'volunteers', volunteerId);
+      const volunteerDocRef = doc(db, 'data', companyId, 'volunteers', volunteerId); 
       await deleteDoc(volunteerDocRef);
       navigate('/dashboard/volunteers'); // Navigate back to the volunteers list
     } catch (err) {
@@ -54,7 +56,7 @@ function VolunteerDetailsPage() {
     };
 
     fetchVolunteerData();
-  }, [companyId, volunteerId]);
+  }, [companyId, volunteerId, useAuth]);
 
 
   if (loading) return (

@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { collection, addDoc } from 'firebase/firestore';
 import { db } from '../../firebase/config'; // Adjust the path as needed
 import { useauthContext } from '../../contexts/authContext'; // Adjust the path as needed
+import { useAuth } from '../../contexts/authContext'; // Adjust the path as needed
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 // Ensure userRole is available
 function AddLeadForm() {
-  const { companyId } = useauthContext();
+  const { companyId } = useAuth();
   const navigate = useNavigate(); // Get the navigate function
-
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -27,7 +27,7 @@ function AddLeadForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
-  const { userRole } = useauthContext(); // Get the userRole
+  const { userRole } = useAuth(); // Get the userRole
 
   // Validation functions (simplified for brevity, add more robust logic as needed)
   const validateFullName = (name) => {

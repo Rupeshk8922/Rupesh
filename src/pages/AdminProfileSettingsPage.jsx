@@ -1,13 +1,12 @@
 import React, { useEffect } from 'react';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase/config'; // Assuming you have initialized Firebase and exported db
-import { useauthContext } from '../contexts/authContext'; // Corrected import path
-import { useAuth } from '../contexts/authContext';
+import { useAuth } from '../contexts/authContext'; // Corrected import path
 
 function AdminProfileSettingsPage() { // Review for mobile responsiveness, especially form layout.
   const { currentUser } = useAuth(); // Use useAuth hook
   // For now, we'll use basic data from auth context and a placeholder for phone number
-  const [name, setName] = React.useState(currentUser?.displayName || '');
+  const [name, setName] = React.useState(currentUser?.displayName || ''); // Initial state using currentUser from useAuth
   const [phoneNumber, setPhoneNumber] = React.useState('');
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(null);

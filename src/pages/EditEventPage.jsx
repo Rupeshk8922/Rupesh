@@ -2,12 +2,12 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { collection, query, onSnapshot, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase/config'; // Firestore config
-import { useauthContext } from '../contexts/authContext';
+import { useAuth } from '../contexts/authContext';
 
 function EditEventPage() { // Review for mobile responsiveness, especially form layout.
   const { eventId } = useParams(); // Get eventId from URL
-  const { user, userRole, companyId } = useauthContext(); // Get user, userRole and companyId from Auth context
-  const navigate = useNavigate(); // Note: user is not directly used here but included for completeness from useauthContext
+  const { user, userRole, companyId } = useAuth(); // Get user, userRole and companyId from Auth context
+  const navigate = useNavigate(); // Note: user is not directly used here but included for completeness from useAuth
 
   // Form data state
   const [formData, setFormData] = useState({

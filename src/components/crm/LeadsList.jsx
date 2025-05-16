@@ -2,13 +2,11 @@ import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useLeads from '../../hooks/useLeads';
 import { useauthContext } from '../../contexts/authContext';
-import ConfirmDeleteModal from '@/components/ConfirmDeleteModal';
+import { useAuth } from '../../contexts/authContext';
+import ConfirmDeleteModal from '../ConfirmDeleteModal';
 import { db } from '../../firebase/config';
 import { doc, deleteDoc } from 'firebase/firestore';
-
 const LeadsList = () => {
-
- const { user, userRole, companyId } = useauthContext(); // Get userRole and companyId from useauthContext
   const { leads, loading, error } = useLeads();
 
   const ROLES = {

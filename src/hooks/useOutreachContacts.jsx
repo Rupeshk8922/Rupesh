@@ -1,15 +1,14 @@
 import { useEffect, useState, useCallback } from 'react';
 import { db } from '../firebase'; // Your Firebase initialization
 import { collection, query, orderBy, limit, getDocs, startAfter } from 'firebase/firestore';
-import { useauthContext } from '../contexts/authContext';
+import { useAuth } from '../contexts/authContext';
 const useOutreachContacts = () => {
-  const { currentUser, companyId } = useauthContext();
+  const { user: currentUser, companyId } = useAuth();
   const [contacts, setContacts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [lastDoc, setLastDoc] = useState(null);
   const [hasMore, setHasMore] = useState(true);
-
   const initialFetch = useCallback(async () => {
     if (!currentUser || !companyId) {
       setLoading(false);
@@ -18,7 +17,7 @@ const useOutreachContacts = () => {
 
     try {
       const contactsRef = collection(db, 'companies', companyId, 'outreachContacts');
-      const q = query(contactsRef, orderBy('createdAt'), limit(10));
+      const q = query(contactsRef, orderBy('name'), limit(10));
 
       const snapshot = await getDocs(q);
       const contactsData = snapshot.docs.map(doc => ({
@@ -41,7 +40,7 @@ const useOutreachContacts = () => {
     setLoading(true);
     try {
       const contactsRef = collection(db, 'companies', companyId, 'outreachContacts');
-      const q = query(contactsRef, orderBy('createdAt'), startAfter(lastDoc), limit(10));
+      const q = query(contactsRef, orderBy('name'), startAfter(lastDoc), limit(10));
 
       const snapshot = await getDocs(q);
       const newContactsData = snapshot.docs.map(doc => ({
@@ -70,7 +69,7 @@ const useOutreachContacts = () => {
   // Consider if you need to reset state when companyId changes
    useEffect(() => {
     if (companyId) {
-        setContacts([]);
+        setContacts([]); // Clear contacts on companyId change
         setLastDoc(null);
         setHasMore(true);
         setLoading(true);

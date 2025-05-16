@@ -1,17 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react";
 import { doc, updateDoc, getDocs, collection, query } from "firebase/firestore";
 import { db } from "../../firebase/config";
-import { useauthContext } from "../contexts/authContext";
+import { useAuth } from "../../contexts/authContext";
+import { Dialog, Transition } from '@headlessui/react';
 
-function AssignLeadModal({ isOpen, onClose, leadId }) {
+function AssignLeadModal({ isOpen, onClose, leadId }) { // Removed duplicate import
   const [assignedTo, setAssignedTo] = useState("");
   const [users, setUsers] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(true); // Removed duplicate import
   const [error, setError] = useState(null);
-  const [isAssigning, setIsAssigning] = useState(false); // Added missing import for Fragment and Dialog from @headlessui/react
-
-  const { user } = useauthContext();
-  useEffect(() => {
+  const [isAssigning, setIsAssigning] = useState(false);
+  const { user } = useAuth(); // Corrected hook usage
+    useEffect(() => {
     const fetchUsers = async () => {
       if (!user || !user.companyId) {
         setError("Company information not available.");

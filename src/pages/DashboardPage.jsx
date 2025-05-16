@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAuth } from '../contexts/authContext.jsx'; // Assuming useAuth is needed for dashboard data or checks
-
+ 
 function DashboardPage() { // Mobile Responsiveness: Main component structure, return null or loading state early if necessary.
   return (
     // Mobile Responsiveness: Use padding for overall spacing on small screens.

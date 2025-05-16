@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/authContext"; // Import useAuth
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../contexts/authContext";
 import { useCompanyLogin } from "../hooks/useCompanyLogin"; // Import useCompanyLogin
 import useModal from '../hooks/useModal'; // Assuming you still need this
-// Assuming you are using react-hot-toast, keep this import if needed elsewhere or for future use, otherwise remove
 const LoginPage = () => {
   const navigate = useNavigate();
   // Use user and loading from useauthContext for initial auth check
-  const { user, loading } = useAuth();  // Corrected hook name to useAuth
+  const { user, loading } = useAuth();
   const { isLoading, error, login, subscriptionStatus, role, sendPasswordReset } = useCompanyLogin();
   const { showModal } = useModal();
 

@@ -8,23 +8,21 @@ function CompanySettingsPage() {
   const [companyData, setCompanyData] = useState(null);
   const [message, setMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-  const [errors, setErrors] = useState({});
-  const [error, setError] = useState(null);
-  const { companyId } = useauthContext();
+  const { user, loading: authLoading, companyId } = useAuth(); // Corrected usage
   const { companyId: authCompanyId } = useAuth(); // Use the correctly named hook
   useEffect(() => {
     const fetchCompany = async () => {
       if (!companyId) {
         setLoading(false);
         setError(new Error('Company ID is not available.'));
-        return;
+ return;
       }
       try {
         const companyRef = doc(db, 'companies', authCompanyId); // Use companyId from auth context
         const snap = await getDoc(companyRef);
         if (snap.exists()) setCompanyData(snap.data());
       } catch (err) {
-        console.error('Error fetching company data:', err);
+ console.error('Error fetching company data:', err);
         setError(err);
       } finally {
         setLoading(false);
@@ -38,13 +36,13 @@ function CompanySettingsPage() {
     const { name, value } = e.target;
     setCompanyData((prev) => ({
       ...prev,
-      [name]: value,
+ [name]: value,
     }));
   };
 
   const handleUpdate = async () => {
-    if (!companyId) {
-      setError(new Error('Company ID is not available for update.')); // Use error state for messaging
+    if (!authCompanyId) {
+ setError(new Error('Company ID is not available for update.')); // Use error state for messaging
       return;
     }
 
@@ -59,12 +57,12 @@ function CompanySettingsPage() {
     try {
       const companyDocRef = doc(db, 'companies', authCompanyId); // Use companyId from auth context
       await updateDoc(companyDocRef, {
-        ...companyData,
-        updatedAt: new Date(),
+ ...companyData,
+ updatedAt: new Date(),
       });
       setSuccessMessage('Company settings updated successfully!');
       setMessage('Company info updated!');
-    } catch (err) {
+ } catch (err) {
       console.error('Error updating company data:', err);
       setError(err);
       setMessage('Update failed. Try again.');

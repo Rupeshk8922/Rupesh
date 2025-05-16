@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { collection, addDoc } from 'firebase/firestore';
 import { db } from '../../firebase/config';
-import { useauthContext } from '../../contexts/authContext';
+import { useAuth } from '../../contexts/authContext';
 
 function AddVolunteerForm() {
   const [formData, setFormData] = useState({
@@ -30,7 +30,7 @@ function AddVolunteerForm() {
   const [statusError, setStatusError] = useState('');
   const [notesError, setNotesError] = useState('');
 
-  const { companyId } = useauthContext();
+  const { companyId } = useAuth();
 
   if (!companyId) {
     return (
