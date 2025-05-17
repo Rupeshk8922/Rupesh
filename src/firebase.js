@@ -1,24 +1,39 @@
 // Import necessary modular functions from Firebase SDKs
 import {
-  collection,
+  collection, // Corrected casing
+  getFirestore,
   doc,
   getDocs,
   getDoc,
   addDoc,
   updateDoc,
   deleteDoc,
-} from 'firebase/firestore';
-
-import { db } from './firebase/config.js';
+} from 'firebase/firestore'; // Corrected casing
+import { initializeApp } from 'firebase/app'; // Corrected casing
+import { getAnalytics } from 'firebase/analytics'; // Corrected casing
 import {
   ref,
   uploadBytes,
   getDownloadURL,
   deleteObject,
-} from 'firebase/storage';
+  getStorage,
+} from 'firebase/storage'; // Corrected casing
 
-export { db };
+// Firebase configuration using environment variables
+const firebaseConfig = {
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  databaseURL: process.env.REACT_APP_FIREBASE_DATABASE_URL,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID,
+  measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID, // optional
+};
 
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 // Firestore helpers using modular API
 export async function getCollection(collectionName) {
   const colRef = collection(db, collectionName);
@@ -58,6 +73,14 @@ export async function deleteDocument(collectionName, documentId) {
   await deleteDoc(docRef);
 }
 
+// Initialize Storage and Analytics
+const storage = getStorage(app);
+let analytics;
+if (process.env.NODE_ENV === 'production') {
+  analytics = getAnalytics(app);
+}
+
+export { db, app, analytics };
 // Storage helpers using modular API
 export async function uploadFile(file, path) {
   const storageRef = ref(storage, path);

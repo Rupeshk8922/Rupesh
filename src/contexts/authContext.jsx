@@ -2,21 +2,16 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from 'firebase/firestore'; // Import firestore functions
 import { auth, db } from "../firebase/config"; // your firebase config file
-
 const AuthContext = createContext();
-
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true); // Loading state for Firebase Auth
   const [userData, setUserData] = useState(null); // State for fetched user data (role, companyId, etc.)
   const [userDataLoading, setUserDataLoading] = useState(true); // Loading state for user data fetch
-
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      console.log("onAuthStateChanged fired:", currentUser);
       setUser(currentUser);
       setAuthLoading(false); // Firebase Auth state is ready
-
       if (currentUser) {
         // If user is logged in, fetch their data
         setUserDataLoading(true);
@@ -40,20 +35,17 @@ export const AuthProvider = ({ children }) => {
         setUserDataLoading(false);
       }
     });
-
     return () => unsubscribe();
   }, []);
-
   // Determine if everything is fully loaded
   const authIsFullyLoaded = !authLoading && !userDataLoading;
-
   return (
     <AuthContext.Provider value={{
       user,
       authLoading, // Loading state for Firebase Auth (can be used if needed)
       userData, // Contains role, companyId, subscriptionStatus
       userDataLoading, // Loading state for fetching user data
-      authIsFullyLoaded, // Combined loading state
+      authIsFullyLoaded,
       userRole: userData?.role, // Expose role directly for convenience
       companyId: userData?.companyId, // Expose companyId
       subscriptionStatus: userData?.subscriptionStatus // Expose subscriptionStatus
@@ -62,5 +54,4 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
-
 export const useAuth = () => useContext(AuthContext);

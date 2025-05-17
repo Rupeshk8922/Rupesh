@@ -9,7 +9,7 @@
     "@mui/material": "^7.1.0",
     "cors": "^2.8.5",
     "express": "^5.1.0",
-    "firebase": "^10.10.0",
+    "firebase": "^10.14.1",
     "framer-motion": "^12.10.5",
     "razorpay": "^2.9.6",
     "react": "^18.2.0",

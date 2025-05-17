@@ -9,25 +9,33 @@ service cloud.firestore {
       allow create: if request.auth != null && request.auth.uid == userId; // Allow authenticated users to create their own document
     }
 
+    // Allow company users to read their company document based on custom claim
+    match /companies/{companyId} {
+      allow read: if request.auth != null &&
+ request.auth.token.companyId == companyId;
+    }
+
     // Company data only visible to users within that company
     match /companies/{companyId}/users/{userId} {
       allow read, write: if request.auth != null && (
-        request.auth.uid == userId ||
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin" &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.companyId == companyId
+ request.auth.uid == userId ||
+ (request.auth.token.role == "admin" &&
+ request.auth.token.companyId == companyId)
       );
     }
 
-    // CRM data restricted by company
-    match /data/{companyId}/{doc=**} {
-      allow read, write: if request.auth != null &&
-        exists(/databases/$(database)/documents/companies/$(companyId)/users/$(request.auth.uid));
+    // Allow access to leads for specific roles within their company
+    match /leads/{leadId} {
+ allow read, write: if request.auth != null &&
+ request.auth.token.companyId == resource.data.companyId &&
+ request.auth.token.role in ['admin', 'csr', 'telecaller'];
     }
-
-    // Subscriptions
-    match /subscriptions/{companyId} {
+    
+    // Allow access to events for specific roles within their company
+    match /events/{eventId} {
       allow read: if request.auth != null &&
-        exists(/databases/$(database)/documents/companies/$(companyId)/users/$(request.auth.uid));
+ request.auth.token.companyId == resource.data.companyId &&
+ request.auth.token.role in ['admin', 'outreach', 'volunteer'];
     }
   }
 }

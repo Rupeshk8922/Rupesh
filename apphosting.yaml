@@ -4,6 +4,7 @@ env:
     availability:
       - BUILD
       - RUNTIME
+
   - variable: VITE_FIREBASE_AUTH_DOMAIN
     value: "empact-yhwq3.firebaseapp.com"
     availability:
@@ -39,3 +40,7 @@ env:
     availability:
       - BUILD
       - RUNTIME
+
+runConfig:
+  # Replace 'npm start' with the actual command to start your backend
+  start: "npm start"

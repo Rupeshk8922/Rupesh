@@ -4,16 +4,15 @@ import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
 import { getFunctions } from "firebase/functions";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBuUElnfQeKIZ-XpN5Wn_Er5xjTPVyhvt4",
-  authDomain: "empact-yhwq3.firebaseapp.com",
-  databaseURL: "https://empact-yhwq3-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "empact-yhwq3",
-  storageBucket: "empact-yhwq3.appspot.com", // <-- Corrected bucket domain
-  messagingSenderId: "1011581028115",
-  appId: "1:1011581028115:web:b2811728353ecf9521fce6",
-  measurementId: "G-9YSYE6PSC6"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET, // <-- Corrected bucket domain
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
-
 // Initialize Firebase
 const firebaseApp = initializeApp(firebaseConfig);
 const auth = getAuth(firebaseApp);

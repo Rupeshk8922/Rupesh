@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../firebase/config'; // Verify your firebase config import
+import { db } from '../firebase/config';
 
 const useFetchCompanyData = (companyId) => {
   const [companyData, setCompanyData] = useState(null);
@@ -11,6 +11,7 @@ const useFetchCompanyData = (companyId) => {
     let isMounted = true;
 
     const fetchCompanyData = async () => {
+      // Only attempt to fetch if companyId is available
       if (!companyId) {
         if (isMounted) {
           setCompanyData(null);
@@ -43,12 +44,21 @@ const useFetchCompanyData = (companyId) => {
       }
     };
 
-    fetchCompanyData();
+    // Add a check here to ensure companyId is available before fetching
+    if (companyId) {
+      fetchCompanyData();
+    } else {
+       // If companyId is not available yet, set loading to false
+       if(isMounted) {
+         setLoading(false);
+       }
+    }
+
 
     return () => {
       isMounted = false;
     };
-  }, [companyId]);
+  }, [companyId]); // Dependency array includes companyId
 
   return { companyData, loading, error };
 };

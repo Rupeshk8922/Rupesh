@@ -1,26 +1,22 @@
 import { Navigate } from "react-router-dom";
 import { useSubscription } from "../contexts/SubscriptionContext";
-import NoAccessPage from "../pages/NoAccessPage"; // Adjust the path as needed\nimport { useAuth } from "../contexts/authContext.jsx"; // Corrected import of useAuth\n
+import NoAccessPage from "../pages/NoAccessPage"; // Adjust the path as needed
+import { useAuth } from "../contexts/authContext.jsx"; // Corrected import of useAuth
 
 import { useState, useEffect } from "react"; // Import useState and useEffect
-const ProtectedRoute = ({ children, requiredRole, requiredSubscription }) => {const { currentUser, userRole, authIsReady } = useAuth(); // Get currentUser, userRole, and authIsReady from useAuthContext
-  const { subscriptionStatus, subscriptionLoading } = useSubscription(); // Get subscriptionStatus and loading state
-  const [loading, setLoading] = useState(true); // State to track overall loading
+const ProtectedRoute = ({ children, requiredRole, requiredSubscription }) => {
+  const { user, userRole, authIsFullyLoaded, subscriptionStatus, userDataLoading } = useAuth(); // Get necessary state from useAuth
 
-  useEffect(() => {
-    // Set loading to false when authentication, subscription, and user data are ready
-    if (!authIsReady && !subscriptionLoading && userRole !== undefined) {
-      setLoading(false);
-    }
-  }, [authIsReady, subscriptionLoading, userRole]);
+  // Combine loading states
+  const isLoading = !authIsFullyLoaded || userDataLoading;
 
   // Show a loading indicator while data is loading
-  if (loading) {
+  if (isLoading) {
     return <div>Loading...</div>; // Or a more sophisticated loading component
   }
 
   // Check authentication
-  if (!currentUser) {
+  if (!user) {
     return <Navigate to="/login" replace />;
   }
 
@@ -30,8 +26,9 @@ const ProtectedRoute = ({ children, requiredRole, requiredSubscription }) => {co
   }
 
   // Check subscription status if required
+  // Assuming subscriptionStatus is available in useAuth after data fetching
   if (requiredSubscription && subscriptionStatus !== 'active') {
-    return <Navigate to="/subscription" replace />;
+    return <Navigate to="/upgrade-plan" replace />; // Redirect to upgrade page
   }
 
   // If all checks pass, render the children
