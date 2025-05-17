@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, sendPasswordResetEmail, connectAuthEmulator } from "firebase/auth";
+import { getAuth, sendPasswordResetEmail, connectAuthEmulator, setPersistence, browserLocalPersistence } from "firebase/auth";
 import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
 import { getFunctions } from "firebase/functions";
 
@@ -18,6 +18,9 @@ const firebaseConfig = {
 const firebaseApp = initializeApp(firebaseConfig);
 const auth = getAuth(firebaseApp);
 const db = getFirestore(firebaseApp);
+// Optional but recommended to avoid session loss
+setPersistence(auth, browserLocalPersistence);
+
 const functions = getFunctions(firebaseApp);
 
 // Connect to emulators in development

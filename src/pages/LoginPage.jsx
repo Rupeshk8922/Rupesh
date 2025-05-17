@@ -73,7 +73,7 @@ import useModal from '../hooks/useModal.jsx'; // Assuming you still need this
   if (loading) return <div>Loading Authentication...</div>;
 
   // Render the login form only if auth is not loading AND there is no authenticated user
-  if (!user) return (
+  if (!user && !loading) return (
     // Mobile Responsiveness: Consider wrapping the form in a container with padding (e.g., p-4)
     // and possibly limiting its max-width and centering it on larger screens (e.g., max-w-sm mx-auto)
     // The form itself will likely stack elements well on small screens due to block-level inputs.

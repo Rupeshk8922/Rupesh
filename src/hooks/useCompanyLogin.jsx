@@ -61,6 +61,8 @@ export const useCompanyLogin = () => {
           setError('An error occurred during company verification.');
         }
       } catch (loginError) {
+        console.log("Attempted login email:", email);
+        console.log("Firebase login error object:", loginError);
         console.error("Login error:", loginError);
         setError('Login failed. Please check your credentials.');
       } finally {
