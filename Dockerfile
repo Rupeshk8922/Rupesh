@@ -34,4 +34,4 @@ ENV PORT=8080
 EXPOSE 8080
 
 # Command to run the 'serve' application
-CMD ["ash", "-c", "echo 'Starting serve' && serve -s -l ${PORT}"]
+CMD ["serve", "-s", "-l", "8080"]
