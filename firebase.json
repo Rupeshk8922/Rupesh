@@ -3,7 +3,7 @@
     "source": "functions"
   },
   "hosting": {
-    "target": "studio",
+    "public": "dist",
     "ignore": [
       "firebase.json",
       "**/.*",
@@ -14,8 +14,7 @@
         "source": "**",
         "destination": "/index.html"
       }
-    ],
-    "public": "build"
+    ]
   },
   "firestore": {
     "rules": "functions/firestore.rules"
