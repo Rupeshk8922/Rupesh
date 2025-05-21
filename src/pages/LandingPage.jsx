@@ -1,6 +1,5 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/authContext'; // Assuming authContext is in src/contexts
+// Assuming authContext is in src/contexts
 
 function LandingPage() { 
   const navigate = useNavigate();

@@ -1,5 +1,4 @@
-jsx
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 // This component is for displaying and managing integration settings.
 const IntegrationsSettings = () => {

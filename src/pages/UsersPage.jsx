@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { collection, getDocs, query, deleteDoc, doc } from 'firebase/firestore';
+import { useState, useEffect } from 'react';
+import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../firebase/config'; // Import Firebase configuration
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/authContext'; // Corrected import name
@@ -11,8 +11,7 @@ function UsersPage() {
   const [loading, setLoading] = useState(true);
   const [roleFilter, setRoleFilter] = useState('');
   const [error, setError] = useState(null);
-  const { user, loading: authLoading } = useAuth(); // Assuming the user's role is provided via context
- const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10); // You can customize this
 
@@ -27,7 +26,7 @@ function UsersPage() {
         }));
         setUsers(usersList);
         setFilteredUsers(usersList);
-      } catch (err) {
+      } catch (error) {
         setError('Error fetching users');
       }
       setLoading(false);
@@ -50,14 +49,6 @@ function UsersPage() {
 
   const handleRoleFilterChange = (e) => {
     setRoleFilter(e.target.value);
-  };
-
-  const handleEdit = (user) => {
-    if (user && user.role === 'admin') { // Check if user exists and has admin role
- navigate(`/dashboard/users/${user.id}/edit`);
-    } else {
-      alert('You do not have permission to edit this user.');
-    }
   };
 
   const handleDelete = (userId) => {
@@ -127,9 +118,9 @@ function UsersPage() {
             </div>
 
             {user && user.role === 'admin' && ( // Check if user exists and is admin
-              <Link to="/dashboard/users/add">
-                <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                  Create User
+              <Link to="/dashboard/users/add" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                <button>
+                 Create User
                 </button>
               </Link>
             )}

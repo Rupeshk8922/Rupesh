@@ -1,37 +1,12 @@
-jsx
-import React, { useEffect, useState } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../../firebase/config'; // Corrected path to firebase config
 import { useNavigate } from 'react-router-dom';
-import VolunteerForm from '../../components/VolunteerForm';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
-
+import useVolunteers from '../hooks/useVolunteers';
+import { useState, useEffect } from 'react';
 export default function VolunteersPage() {
-  const [volunteers, setVolunteers] = useState([]);
-  const [filteredVolunteers, setFilteredVolunteers] = useState([]);
+ const { volunteers, loading, error, fetchVolunteers } = useVolunteers();
   const [searchTerm, setSearchTerm] = useState('');
   const [showDialog, setShowDialog] = useState(false);
-  const navigate = useNavigate(); 
-
-  // Fetch volunteers on load
-  useEffect(() => {
-    const fetchVolunteers = async () => {
-      try {
-        const snapshot = await getDocs(collection(db, 'volunteers'));
-        const data = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setVolunteers(data);
-        setFilteredVolunteers(data);
-      } catch (error) {
-        console.error('Error fetching volunteers:', error);
-      }
-    };
-    fetchVolunteers();
-  }, []);
+  const navigate = useNavigate();
+  const [filteredVolunteers, setFilteredVolunteers] = useState(volunteers);
 
   // Client-side filter
   useEffect(() => {
@@ -39,23 +14,14 @@ export default function VolunteersPage() {
       vol.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredVolunteers(filtered);
-  }, [searchTerm, volunteers]);
+  }, [searchTerm, volunteers]); // Update filtered list when volunteers or searchTerm changes
 
-  const handleVolunteerAdded = async () => {
+  const handleVolunteerAdded = () => {
     setShowDialog(false);
-    // Re-fetch volunteers after a new one is added
-    try {
-      const snapshot = await getDocs(collection(db, 'volunteers'));
-      const volunteersList = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setVolunteers(volunteersList);
-      setFilteredVolunteers(volunteersList); // Update filtered list as well
-    } catch (err) {
+    // Re-fetch volunteers after a new one is added using the hook's fetch function
+    fetchVolunteers().catch((err) => {
       console.error('Error fetching volunteers after add:', err);
-      // Optionally, you could add state to show an error message to the user here
-    }
+    });
   };
 
   return (
@@ -64,6 +30,14 @@ export default function VolunteersPage() {
     // if you want to center and limit the width of the content on larger screens.
     <div className="p-6">
       {/* Mobile Responsiveness: Ensure heading text scales or wraps appropriately. */}
+      <h1 className="text-2xl font-bold mb-4">Volunteers</h1>
+
+      {loading && <div>Loading volunteers...</div>}
+      {error && <div>Error fetching volunteers: {error.message}</div>}
+
+      {!loading && !error && (
+        <>
+
       <div className="flex justify-between items-center mb-4">
         {/* Mobile Responsiveness: Consider making this container flex-col on small screens (flex-col sm:flex-row)
             so the search input and button stack vertically. Adjust spacing with gap-y-2 or space-y-2. */}
@@ -78,7 +52,7 @@ export default function VolunteersPage() {
             <Button>Add Volunteer</Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[600px]">
-            <VolunteerForm onClose={() => setShowDialog(false)} />
+            <VolunteerForm onClose={handleVolunteerAdded} /> {/* Use the handler */}
           </DialogContent>
         </Dialog>
       </div>
@@ -138,6 +112,8 @@ export default function VolunteersPage() {
           </tbody>
         </table>
       </div>
+        </>
+      )}
     </div>
   );
 }

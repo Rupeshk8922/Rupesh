@@ -1,14 +1,8 @@
-import React, { useState } from 'react';
-import { Button, Snackbar, Alert } from '@mui/material';
+import { useState } from 'react';
 import '../styles/UpgradePlan.css';
-import { useAuth } from '../contexts/authContext'; // Assuming useAuth is needed here
- 
 const UpgradePlan = () => {
   const [openSnackbar, setOpenSnackbar] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState('');
- 
-  const handleCloseSnackbar = () => setOpenSnackbar(false);
- 
+
   return (
     // Mobile Responsiveness: The .upgrade-plan-page class might have padding or max-width rules.
     // Ensure these are responsive. Using Tailwind's p-4 or similar and max-w-md mx-auto could help center
@@ -42,21 +36,6 @@ const UpgradePlan = () => {
           to discuss upgrade options.
         </p>
 
-        {/* Mobile Responsiveness: Snackbar is a Material UI component, generally responsive. */}
-        {/* Ensure its positioning and size are appropriate for different screen sizes. sx={{ width: '100%' }} is good for full width. */}
-        {/* Basic Error Handling */}
-        <Snackbar
-          open={openSnackbar}
-          autoHideDuration={6000}
-          onClose={handleCloseSnackbar}
-        >
-          <Alert onClose={handleCloseSnackbar} severity="error" sx={{ width: '100%' }}>
-            {snackbarMessage}
-          </Alert>
-        </Snackbar>
-
-        {/* Mobile Responsiveness: .cta-container likely wraps the button. */}
-        {/* Ensure the button is centered or takes appropriate width on mobile. Tailwind: text-center or w-full */}
         <div className="cta-container">
           <Button
             variant="contained"
@@ -69,7 +48,6 @@ const UpgradePlan = () => {
                 // This current approach works for web but might not be ideal in all PWA contexts.
               } catch (error) {
                 console.error("Error initiating call:", error);
-                setSnackbarMessage("Could not initiate call. Please try again or dial manually.");
                 setOpenSnackbar(true);
               }
             }}

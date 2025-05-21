@@ -1,16 +1,41 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState } from 'react';
 import { useVolunteers } from '../hooks/useVolunteers'; // Adjust path as necessary
-import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, BarChart, Bar } from 'recharts';
 import { getVolunteerEventCount } from '../utils/volunteerAnalytics'; // Adjust path as necessary
-import { useAuth } from '../contexts/authContext';
+
+// Import Recharts components
+import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend, LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 
 const VolunteerAnalyticsPage = () => {
-  const { user, loading: authLoading } = useAuth(); // Use useAuth hook
+  const companyId = 'your_company_id_here'; // Replace with actual company ID logic
+  const { volunteers, loading, error } = useVolunteers(companyId);
 
-  // State for date range filter (basic for now)
+  // State for date range filter
   const [selectedDateRange, setSelectedDateRange] = useState('allTime');
 
+  // Placeholder for COLORS - moved inside useMemo for local scope or define globally if static
+  const PIE_CHART_COLORS = ['#10B981', '#EF4444', '#F59E0B', '#6366F1']; // More colors for potential future use
+
   const analyticsData = useMemo(() => {
+    const now = new Date();
+
+    switch (selectedDateRange) {
+ case 'thisMonth': {
+ break;
+ }
+ case 'thisQuarter': {
+ break;
+ }
+ case 'thisYear': {
+ break;
+ }
+ case 'allTime':
+ default: {
+        // No date filtering, startDate and endDate remain null
+        break;
+ }
+ // No actual filtering logic based on dates is implemented yet
+    }
+
     if (!volunteers) {
       return {
         volunteerStatusData: [],
@@ -20,97 +45,45 @@ const VolunteerAnalyticsPage = () => {
         totalAssignedEvents: 0,
         averageEventsPerVolunteer: 0,
         averageEventsPerActiveVolunteer: 0,
-        volunteersByLocationData: [], // Added for location chart
-        COLORS: [], // Ensure COLORS is always returned
+        volunteersByLocationData: [],
+        eventsOverTimeData: [],
+        COLORS: PIE_CHART_COLORS, // Use the defined colors
       };
     }
 
-    // Basic date filtering logic (similar to EventAnalyticsPage)
-    const now = new Date();
-    let startDate = null;
-    let endDate = null;
-
-    switch (selectedDateRange) {
-      case 'thisMonth':
-        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-        break;
-      case 'thisQuarter':
-        const currentMonth = now.getMonth();
-        const quarter = Math.floor(currentMonth / 3);
-        startDate = new Date(now.getFullYear(), quarter * 3, 1);
-        endDate = new Date(now.getFullYear(), quarter * 3 + 3, 0);
-        break;
-      case 'thisYear':
-        startDate = new Date(now.getFullYear(), 0, 1);
-        endDate = new Date(now.getFullYear(), 11, 31);
-        break;
-      case 'allTime':
-      default:
-        // No date filtering
-        break;
-    }
-
     const totalVolunteers = volunteers.length;
-    const activeVolunteers = volunteers.filter(v => v.status === 'Active').length;
-    const inactiveVolunteers = volunteers.filter(v => v.status === 'Inactive').length;
-
     const activeVolunteersList = volunteers.filter(v => v.status === 'Active');
-    const totalAssignedEvents = volunteers.reduce((sum, v) => sum + getVolunteerEventCount(v), 0); // Total across all volunteers
-    const totalAssignedEventsToActive = activeVolunteersList.reduce((sum, v) => sum + getVolunteerEventCount(v), 0);
+    const activeVolunteers = activeVolunteersList.length;
+    const inactiveVolunteers = totalVolunteers - activeVolunteers; // Calculate inactive volunteers
+
+    // Ensure getVolunteerEventCount handles cases where assignedEvents might not exist or be empty
+    const totalAssignedEvents = volunteers.reduce((sum, v) => sum + (getVolunteerEventCount(v) || 0), 0);
+    const totalAssignedEventsToActive = activeVolunteersList.reduce((sum, v) => sum + (getVolunteerEventCount(v) || 0), 0);
+
     const averageEventsPerVolunteer = totalVolunteers > 0 ? (totalAssignedEvents / totalVolunteers).toFixed(1) : 0;
     const averageEventsPerActiveVolunteer = activeVolunteers > 0 ? (totalAssignedEventsToActive / activeVolunteers).toFixed(1) : 0;
+
     const volunteerStatusData = [
       { name: 'Active', value: activeVolunteers },
       { name: 'Inactive', value: inactiveVolunteers },
     ];
 
-    // Define custom colors for the pie chart slices
-    const COLORS = ['#10B981', '#EF4444']; // Green for Active, Red for Inactive
-
     // Data for Assigned Events Over Time Chart
-    // This requires accessing the actual event dates for assigned events.
-    // We need to pass event data or fetch it here for accurate time-series analysis.
-    // For now, we'll create placeholder data or a simplified aggregation.
-    // A better approach would be to fetch assigned event details or pass them down.
-
     const assignedEventsByMonth = {};
-
-    // This part needs actual event data lookup or joining.
-    // For demonstration, assuming `volunteer.assignedEvents` are just IDs,
-    // and we don't have event date info here. So, the time series chart
-    // will be based on hypothetical or static data until real event dates are integrated.
-    // If volunteer.assignedEvents *did* contain event objects with a 'date' field,
-    // this would be the logic:
-    // volunteers.forEach(volunteer => {
-    //   if (volunteer.assignedEvents && Array.isArray(volunteer.assignedEvents)) {
-    //     volunteer.assignedEvents.forEach(assignedEvent => {
-    //       const eventDate = new Date(assignedEvent.date); // Assuming assignedEvent has a 'date'
-    //       if ((!startDate || eventDate >= startDate) && (!endDate || eventDate <= endDate)) {
-    //         const monthYear = `${eventDate.getFullYear()}-${eventDate.getMonth() + 1}`;
-    //         assignedEventsByMonth[monthYear] = (assignedEventsByMonth[monthYear] || 0) + 1;
-    //       }
-    //     });
-    //   }
-    // });
-
-    // Placeholder: If you don't have event dates easily accessible in volunteer object,
-    // this chart will effectively just show total assignments per volunteer, or need
-    // to be populated by a separate data fetch.
-    // For a functional placeholder, let's create some dummy data if `assignedEventsByMonth` is empty
-    if (Object.keys(assignedEventsByMonth).length === 0 && totalAssignedEvents > 0) {
-        // Create dummy data, perhaps for current month/year if no real dates
-        const currentMonthYear = `${now.getFullYear()}-${now.getMonth() + 1}`;
-        assignedEventsByMonth[currentMonthYear] = totalAssignedEvents;
+    // This part assumes `getVolunteerEventCount` could be extended to return event dates,
+    // or you would fetch actual event data here based on assigned event IDs.
+    // For a more realistic example, you would need to iterate through actual event objects
+    // associated with volunteers and check their dates.
+    // As per your comment, this is a placeholder.
+    if (totalAssignedEvents > 0) {
+      const currentMonthYear = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
+      assignedEventsByMonth[currentMonthYear] = totalAssignedEvents;
     }
 
-
-    // Convert aggregated data to array format for Recharts
     const eventsOverTimeData = Object.keys(assignedEventsByMonth).map(key => ({
       name: key, // e.g., "2023-10"
       events: assignedEventsByMonth[key]
     })).sort((a, b) => {
-      // Sort by date correctly (e.g., "2023-10" vs "2024-1")
       const [yearA, monthA] = a.name.split('-').map(Number);
       const [yearB, monthB] = b.name.split('-').map(Number);
       if (yearA !== yearB) return yearA - yearB;
@@ -130,20 +103,20 @@ const VolunteerAnalyticsPage = () => {
     })).sort((a, b) => b.count - a.count); // Sort by count descending
 
     return {
-      volunteersByLocationData, // Return the new data
+      volunteersByLocationData,
       volunteerStatusData,
-      COLORS, // Add colors to the returned data
+      COLORS: PIE_CHART_COLORS, // Use the defined colors
       totalVolunteers,
       activeVolunteers,
       inactiveVolunteers,
       totalAssignedEvents,
       averageEventsPerVolunteer,
       averageEventsPerActiveVolunteer,
-      eventsOverTimeData, // Add chart data
+      eventsOverTimeData,
     };
   }, [volunteers, selectedDateRange]); // Added selectedDateRange to dependencies
-  const { volunteers, loading, error } = useVolunteers(companyId);
- const companyId = user?.companyId; // Access companyId from the authenticated user
+
+  // Ensure companyId is available before attempting to fetch volunteers
   if (!companyId) {
     return <div className="p-6 text-center text-gray-600">Please log in to view volunteer analytics.</div>;
   }
@@ -182,7 +155,7 @@ const VolunteerAnalyticsPage = () => {
         </select>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6"> {/* Added mb-6 for spacing */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
         <div className="bg-white p-6 rounded-lg shadow-md flex flex-col justify-between">
           <div className="flex items-center mb-4">
             {/* Placeholder for icon, e.g., <UserGroupIcon className="h-6 w-6 text-gray-500 mr-2" /> */}
@@ -224,7 +197,7 @@ const VolunteerAnalyticsPage = () => {
           <h2 className="text-xl font-semibold text-gray-700 mb-4">Avg Events per Active Volunteer</h2>
           <p className="text-4xl font-bold text-blue-600">{analyticsData.averageEventsPerActiveVolunteer}</p>
         </div>
-      </div> {/* This div now correctly closes the first grid container */}
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
         <div className="bg-white p-6 rounded-lg shadow-md">
@@ -236,9 +209,9 @@ const VolunteerAnalyticsPage = () => {
                 cx="50%"
                 cy="50%"
                 outerRadius={100}
-                fill="#8884d8" // Default fill color, overridden by Cell colors
+                fill="#8884d8"
                 dataKey="value"
-                labelLine={false} // Hide label lines
+                labelLine={false}
               >
                 {analyticsData.volunteerStatusData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={analyticsData.COLORS[index % analyticsData.COLORS.length]} />
@@ -256,7 +229,7 @@ const VolunteerAnalyticsPage = () => {
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={analyticsData.eventsOverTimeData}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" /> {/* e.g., Month-Year */}
+              <XAxis dataKey="name" />
               <YAxis />
               <Tooltip />
               <Legend />

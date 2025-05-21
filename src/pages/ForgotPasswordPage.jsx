@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { sendPasswordReset } from '../firebase/config';
-import { CircularProgress } from '@mui/material';
-// Assuming you might need auth context for redirection or user status later
+import { firebaseSendPasswordResetEmail } from '../firebase/config';
+// Assuming you might need auth context for redirection or user status later\n// import { useAuth } from '../contexts/authContext';
 // import { useAuth } from '../contexts/authContext';
 const ForgotPasswordPage = () => {
   const [email, setEmail] = useState('');
@@ -15,7 +14,7 @@ const ForgotPasswordPage = () => {
     setError(null);
     setMessage(null);
     try {
-      await sendPasswordReset(email);
+      await firebaseSendPasswordResetEmail(email);
       setMessage('Password reset email sent. Check your email to reset your password.');
       setEmail('');
     } catch (err) {

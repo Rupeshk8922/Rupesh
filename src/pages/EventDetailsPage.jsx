@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc, deleteDoc, getFirestore } from 'firebase/firestore';
-import { useauthContext } from '../contexts/authContext';
-import ConfirmDeleteModal from '../components/ConfirmDeleteModal.jsx';
+import { AuthContext } from '../contexts/authContext';
+import ConfirmDeleteModal from '../components/modals/ConfirmDeleteModal'; // Ensure this file exists
 
 function EventDetailsPage() {
   const { eventId } = useParams();
   const navigate = useNavigate();
-  const { user, userRole, companyId } = useauthContext();
+  const { userRole, companyId } = useContext(AuthContext);
 
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -16,12 +16,15 @@ function EventDetailsPage() {
 
   const ROLES = {
     ADMIN: 'admin',
-    MANAGER: 'Manager',
+    MANAGER: 'manager',
     ORGANIZER: 'organizer',
   };
 
   useEffect(() => {
     const fetchEventData = async () => {
+      setLoading(true);
+      setError(null);
+
       if (!companyId || !eventId) {
         setError('Company ID or Event ID is missing. Cannot fetch event details.');
         setLoading(false);
@@ -46,14 +49,10 @@ function EventDetailsPage() {
       }
     };
 
-    if (companyId && eventId) {
-      fetchEventData();
-    }
+    fetchEventData();
   }, [companyId, eventId]);
 
-  const handleDeleteClick = () => {
-    setIsDeleteModalOpen(true);
-  };
+  const handleDeleteClick = () => setIsDeleteModalOpen(true);
 
   const handleDeleteConfirm = async () => {
     setIsDeleteModalOpen(false);
@@ -74,19 +73,16 @@ function EventDetailsPage() {
     }
   };
 
-  const handleDeleteCancel = () => {
-    setIsDeleteModalOpen(false);
-  };
+  const handleDeleteCancel = () => setIsDeleteModalOpen(false);
 
   const canEditOrDelete =
     userRole &&
-    (userRole === ROLES.ADMIN ||
-      userRole === ROLES.MANAGER ||
-      userRole === ROLES.ORGANIZER);
+    [ROLES.ADMIN, ROLES.MANAGER, ROLES.ORGANIZER].includes(userRole.toLowerCase());
 
+  // --- Render states ---
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen bg-gray-100">
+      <div className="flex justify-center items-center h-screen">
         <p className="text-xl text-gray-700">Loading event details...</p>
       </div>
     );
@@ -94,7 +90,7 @@ function EventDetailsPage() {
 
   if (error) {
     return (
-      <div className="flex flex-col justify-center items-center h-screen bg-gray-100 space-y-4">
+      <div className="flex flex-col justify-center items-center h-screen space-y-4">
         <p className="text-xl text-red-600">Error: {error}</p>
         <button
           onClick={() => navigate('/events')}
@@ -108,7 +104,7 @@ function EventDetailsPage() {
 
   if (!event) {
     return (
-      <div className="flex flex-col justify-center items-center h-screen bg-gray-100 space-y-4">
+      <div className="flex flex-col justify-center items-center h-screen space-y-4">
         <p className="text-xl text-gray-700">Event data is not available.</p>
         <button
           onClick={() => navigate('/events')}
@@ -121,7 +117,7 @@ function EventDetailsPage() {
   }
 
   return (
-    <div className="p-4 sm:p-6 max-w-4xl mx-auto bg-white rounded-lg shadow-md my-8">
+    <>
       <h2 className="text-3xl font-bold mb-6 text-gray-800 text-center">Event Details</h2>
 
       <div className="space-y-4 text-gray-700">
@@ -158,16 +154,18 @@ function EventDetailsPage() {
         itemType="Event"
         itemName={event?.title || 'this event'}
       />
-    </div>
+    </>
   );
 }
 
-// Helper component to keep detail rows clean
+// --- Reusable Detail component ---
 function Detail({ label, value, preWrap = false }) {
   return (
     <div>
       <h3 className="text-lg font-semibold text-gray-800">{label}:</h3>
-      <p className={`ml-4 text-gray-600 ${preWrap ? 'whitespace-pre-wrap' : ''}`}>{value}</p>
+      <p className={`ml-4 text-gray-600 ${preWrap ? 'whitespace-pre-wrap' : ''}`}>
+        {value || '—'}
+      </p>
     </div>
   );
 }

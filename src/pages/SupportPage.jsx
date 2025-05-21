@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 // Assuming useAuth is needed for user info or sending feedback to a backend tied to auth
 
 function SupportPage() {

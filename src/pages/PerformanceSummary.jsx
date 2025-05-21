@@ -1,16 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import {
-  Container,
-  Typography,
-  Card,
-  CardContent,
-  Grid,
-  CircularProgress,
-} from '@mui/material';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { useState, useEffect } from 'react';
 import { collection, query, where, getDocs } from 'firebase/firestore';
-import { db } from '../firebase/config';
-import { useAuth } from '../contexts/authContext'; // This import seems correct now
+import { db } from '../firebase/config'; // Assuming db is imported from firebase config
+
 function PerformanceSummary() {
   const [performanceData, setPerformanceData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -87,13 +78,13 @@ function PerformanceSummary() {
           <Grid item xs={12} sm={6} md={4} key={data.id}>
             <Card>
               <CardContent>
-                <Typography variant="h6">Week/Month: {data.period}</Typography>
-                <Typography>Calls Made: {data.callsMade}</Typography>
-                <Typography>Successful Interactions: {data.successfulInteractions}</Typography>
                 {/*
                   // TODO: Consider wrapping or adjusting long text/labels on smaller screens if needed.
                   // Material UI's Typography helps, but ensure the card doesn't overflow horizontally.
                 */}
+                <Typography variant="h6">Week/Month: {data.period}</Typography>
+                <Typography>Calls Made: {data.callsMade}</Typography>
+                <Typography>Successful Interactions: {data.successfulInteractions}</Typography>
                 <Typography>Progress Towards Goals: {data.progressTowardsGoals}</Typography>
               </CardContent>
             </Card>

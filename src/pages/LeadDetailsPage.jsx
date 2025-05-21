@@ -1,16 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { doc, getDoc, deleteDoc } from 'firebase/firestore';
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { doc, getDoc, deleteDoc } from 'firebase/firestore'; // Import deleteDoc here
 import { db } from '../firebase/config';
 import { useAuth } from '../contexts/authContext.jsx';
 
 const LeadDetailsPage = () => {
   const { leadId } = useParams();
   const { user, loading: authLoading } = useAuth(); // Use useAuth correctly and get user and authLoading
-  const companyId = user?.companyId; // Access companyId from user object
-  const userRole = user?.role; // Access userRole from user object  const [lead, setLead] = useState(null);
+  const companyId = user?.companyId; // Access companyId from user object  const userRole = user?.role; // Access userRole from user object
+  const userRole = user?.role; // Access userRole from user object
+  const [lead, setLead] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
 
   const allowedRoles = ['admin', 'Manager', 'Outreach Officer'];
   const navigate = useNavigate();
@@ -23,7 +25,7 @@ const LeadDetailsPage = () => {
       return;
     }
 
-    const fetchLeadData = async () => {
+    const fetchLeadData = async () => {setError(null); // Clear previous errors before fetching
       if (!companyId || !leadId) {
         setError('Company ID or Lead ID is missing.');
         setLoading(false);
@@ -31,7 +33,7 @@ const LeadDetailsPage = () => {
       }
 
       try {
-        const leadDocRef = doc(db, 'data', companyId, 'leads', leadId);
+        const leadDocRef = doc(db, 'companies', companyId, 'leads', leadId);
         const leadDocSnap = await getDoc(leadDocRef);
 
         if (leadDocSnap.exists()) {
@@ -60,7 +62,7 @@ const LeadDetailsPage = () => {
         return;
       }
       try {
-        const leadDocRef = doc(db, 'data', companyId, 'leads', leadId);
+        const leadDocRef = doc(db, 'companies', companyId, 'leads', leadId);
         await deleteDoc(leadDocRef);
         console.log('Lead deleted successfully');
         navigate('/dashboard/leads');
@@ -107,20 +109,19 @@ const LeadDetailsPage = () => {
         </div>
       )}
 
-      {lead && leadId && allowedRoles.includes(userRole) && (
+      {lead && allowedRoles.includes(userRole) && (
         <div className="mt-4 flex space-x-2">
-          <Link
-            to={`/leads/${leadId}/edit`}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-          >
-            Edit Lead
-          </Link>
-          <button
-            onClick={handleDelete}
-            className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-          >
-            Delete Lead
-          </button>
+          <div>
+            <a href={`/leads/${leadId}/edit`} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+              Edit Lead
+            </a>
+            <button
+              onClick={handleDelete}
+              className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+            >
+              Delete Lead
+            </button>
+          </div>
         </div>
       )}
     </div>

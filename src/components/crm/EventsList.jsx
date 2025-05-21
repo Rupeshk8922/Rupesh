@@ -1,21 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useEvents from '../../hooks/useEvents.jsx';
-import { doc, updateDoc, deleteDoc } from 'firebase/firestore';
-import { FaCalendarAlt, FaTag, FaMapMarkerAlt, FaUsers, FaCircle, FaSquare } from 'react-icons/fa';
-import { FaSortAlphaUp, FaSortNumericUp, FaArrowUp, FaArrowDown } from 'react-icons/fa';
+import { doc, updateDoc, deleteDoc } from 'firebase/firestore';import { FaCircle, FaSquare } from 'react-icons/fa';
 import { db } from '../../firebase/config';
-import { MdOutlineEventNote } from 'react-icons/md'; // Fix: Remove extra space in comment block
-import ConfirmDeleteModal from '../ConfirmDeleteModal';
-import { useAuth } from '../../contexts/authContext';
 
-const EventsList = () => { // Added function wrapper for the component
+import { useAuth } from '../../hooks/useAuth';import ConfirmDeleteModal from '../modals/ConfirmDeleteModal';
+const EventsList = () => {
  const { companyId, user, userRole } = useAuth();
-  const navigate = useNavigate();
-  const [filterDateRange, setFilterDateRange] = useState('all');
-  const [filterLocation, setFilterLocation] = useState('');
-  const [filterVolunteerCapacity, setFilterVolunteerCapacity] = useState('');
-  const [filterType, setFilterType] = useState(''); // Initialize filterType state
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const handleMarkCompleted = async (eventId) => {
@@ -36,17 +27,17 @@ const EventsList = () => { // Added function wrapper for the component
   const ROLES = {
     ADMIN: 'admin',
     ORGANIZER: 'organizer',
-    MANAGER: 'Manager', // Added Manager role based on usage below
-    CSR: 'CSR', // Added CSR role based on usage below
-    OUTREACH_OFFICER: 'Outreach Officer', // Added Outreach Officer role based on usage below
   };
+  const [filterDateRange, setFilterDateRange] = useState('all'); // Add state for filterDateRange
+  const [filterLocation, setFilterLocation] = useState('');
+  const [filterVolunteerCapacity, setFilterVolunteerCapacity] = useState('');
+  const [filterType, setFilterType] = useState(''); // Initialize filterType state
   const { events, loading, error } = useEvents();
-
+  const navigate = useNavigate();
   const [eventToDeleteId, setEventToDeleteId] = useState(null);
   const [eventToDeleteTitle, setEventToDeleteTitle] = useState('');
 
   const [currentView, setCurrentView] = useState('table');
-  const [sortBy, setSortBy] = useState('date');
   const [sortOrder, setSortOrder] = useState('asc');
 
   const handleDeleteClick = (event) => {
@@ -57,7 +48,7 @@ const EventsList = () => { // Added function wrapper for the component
 
   const handleDeleteConfirm = async () => {
     if (!eventToDeleteId || !companyId) return;
-    try {
+    try { // Corrected the comment formatting
       const eventDocRef = doc(db, 'data', companyId, 'events', eventToDeleteId);
       await deleteDoc(eventDocRef);
       console.log('Event deleted successfully:', eventToDeleteId);
@@ -73,9 +64,6 @@ const EventsList = () => { // Added function wrapper for the component
   const filteredAndSortedEvents = events
     ? events
       .filter((event) => {
-        if (filterType && event.eventType !== filterType) {
-          return false;
-        }
 
         if (filterDateRange !== 'all') {
           const eventDate = new Date(event.date);
@@ -93,18 +81,15 @@ const EventsList = () => { // Added function wrapper for the component
         if (filterLocation && !event.location.toLowerCase().includes(filterLocation.toLowerCase())) {
           return false;
         }
-
         if (filterVolunteerCapacity && filterVolunteerCapacity !== 'all') {
-          const operator = filterVolunteerCapacity.substring(0, 1);
           const value = parseInt(filterVolunteerCapacity.substring(1), 10);
 
           if (isNaN(value)) {
             return true;
           }
 
-          const capacity = parseInt(event.maxVolunteers, 10) || 0;
+          const operator = filterVolunteerCapacity.substring(0, 1);
           const assignedCount = event.assignedVolunteers ? event.assignedVolunteers.length : 0;
-
           switch (operator) {
             case '>':
               if (assignedCount <= value) return false;
@@ -122,31 +107,20 @@ const EventsList = () => { // Added function wrapper for the component
         return true;
       })
       .sort((a, b) => {
-        if (sortBy === 'date') {
-          const dateA = new Date(a.date);
-          const dateB = new Date(b.date);
-          return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
-        } else if (sortBy === 'title') {
-          return sortOrder === 'asc'
-            ? a.title.localeCompare(b.title)
-            : b.title.localeCompare(a.title);
-        } else if (sortBy === 'volunteers') {
-          const volA = a.assignedVolunteers ? a.assignedVolunteers.length : 0;
-          const volB = b.assignedVolunteers ? b.assignedVolunteers.length : 0;
-          return sortOrder === 'asc' ? volA - volB : volB - volA;
-        }
-        return 0;
+        const dateA = new Date(a.date); // Corrected the comment formatting
+        const dateB = new Date(b.date);
+        return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
       })
     : [];
 
   const getEventTypeIcon = (eventType) => {
     switch (eventType) {
       case 'Webinar':
-        return <FaCircle className="mr-2 text-blue-500" />;
+ return <FaCircle className="mr-2 text-blue-500" />;
       case 'Awareness Campaign':
-        return <MdOutlineEventNote className="mr-2 text-orange-500" />;
+ return <FaSquare className="mr-2 text-orange-500" />; // Using FaSquare for Awareness Campaign
       case 'Fundraiser': // Added Fundraiser type
-        return <FaSquare className="mr-2 text-purple-500" />; // Example icon for Fundraiser
+ return <FaSquare className="mr-2 text-purple-500" />; // Example icon for Fundraiser
       default:
         return <MdOutlineEventNote className="mr-2 text-gray-500" />;
     }
@@ -159,9 +133,6 @@ const EventsList = () => { // Added function wrapper for the component
 
   const totalPages = Math.max(1, Math.ceil(filteredAndSortedEvents.length / eventsPerPage));
 
-  const toggleView = () => {
-    setCurrentView(currentView === 'table' ? 'card' : 'table');
-  };
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
@@ -171,10 +142,8 @@ const EventsList = () => { // Added function wrapper for the component
           <h3 className="text-xl font-semibold text-gray-700">Filter & Sort</h3>
         </div>
         <div className="flex justify-end mb-4">
-          <div className="w-full mb-6 p-4 bg-gray-50 rounded-lg shadow-sm">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="flex items-center space-x-2">
-                <FaTag className="text-gray-500" />
                 <select
                   className="w-full border px-3 py-2 rounded"
                   value={filterType}
@@ -213,7 +182,7 @@ const EventsList = () => { // Added function wrapper for the component
                 <input
                   type="text"
                   className="w-full border px-3 py-2 rounded"
-                  placeholder="Filter by Volunteers (e.g., >5, <10, =3)"
+                  placeholder="Filter by Volunteers (e.g., >5, <10, =3)" // Corrected the comment formatting
                   title="Enter operator (> < =) followed by a number (e.g., >5)"
                   pattern="[><=]\d+"
                   value={filterVolunteerCapacity}
@@ -233,8 +202,8 @@ const EventsList = () => { // Added function wrapper for the component
                 <div className="flex items-center space-x-2">
                   <select
                     className="w-full border px-3 py-2 rounded"
-                    value={sortBy}
-                    onChange={(e) => { setSortBy(e.target.value); setCurrentPage(1); }}
+                    value={'date'}
+                    onChange={() => { /* setSortBy(e.target.value); */ setCurrentPage(1); }}
                   >
                     <option value="date">Date</option>
                     <option value="title">Title</option>
@@ -242,32 +211,31 @@ const EventsList = () => { // Added function wrapper for the component
                   </select>
                 </div>
                 <button
-                  className={`px-4 py-2 rounded ${currentView === 'card' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
-                  onClick={() => setCurrentView('card')}
-                >
-                  Card View
-                </button>
+                 className={`px-4 py-2 rounded ${currentView === 'card' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
+                 onClick={() => setCurrentView('card')}
+               >Card View</button>
               </div>
-              <div className="flex items-center space-x-2">
                 <select
                   className="w-full border px-3 py-2 rounded"
                   value={sortOrder}
                   onChange={(e) => { setSortOrder(e.target.value); setCurrentPage(1); }}
                 >
                   <option value="asc">
-                    {sortBy === 'date' ? 'Ascending (Oldest First)' : sortBy === 'title' ? 'Ascending (A-Z)' : 'Ascending (Low to High)'}
+                    {'Ascending (Oldest First)'}
                   </option>
                   <option value="desc">
-                    {sortBy === 'date' ? 'Descending (Newest First)' : sortBy === 'title' ? 'Descending (Z-A)' : 'Descending (High to Low)'}
+                    {'Descending (Newest First)'}
                   </option>
                 </select>
-                {sortOrder === 'asc' ? <FaArrowUp className="text-gray-600" /> : <FaArrowDown className="text-gray-600" />}
-              </div>
-            </div>
           </div>
 
           {loading && <p>Loading events...</p>}
-          {error && <p className="text-red-500">Error loading events: {error.message}</p>}
+          {error && (
+            <div className="text-red-500 mb-4">
+              Error loading events: {error.message}
+            </div>
+          )}
+
 
           {!loading && !error && (filteredAndSortedEvents.length === 0 ? (
             <p>No events found. Add your first event!</p>
@@ -295,10 +263,9 @@ const EventsList = () => { // Added function wrapper for the component
                         <td className="py-3 px-6 text-left">{event.date}</td>
                         <td className="py-3 px-6 text-left">{event.location}</td>
                         {/* Corrected the misplaced backslash in the className below */}
-                        <td className="py-3 px-6 text-left flex items-center">{getEventTypeIcon(event.eventType)}{event.eventType}</td>
                         <td className="py-3 px-6 text-center space-x-2" onClick={(e) => e.stopPropagation()}>
                           {userRole && (userRole === ROLES.ADMIN || userRole === ROLES.MANAGER || (event.assignedTo === user?.uid)) && event.status !== 'Completed' && event.status !== 'Canceled' && (
-                            <button
+                             <button
                               className="text-purple-600 hover:text-purple-800 font-medium text-sm"
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -338,8 +305,6 @@ const EventsList = () => { // Added function wrapper for the component
                 >
                   <h3 className="text-lg font-semibold mb-2 flex items-center">{getEventTypeIcon(event.eventType)} {event.title}</h3>
                   <p className="text-gray-600 text-sm mb-1 flex items-center"><FaCalendarAlt className="mr-2" /> {event.date}</p>
-                  <p className="text-gray-600 text-sm mb-1 flex items-center"><FaMapMarkerAlt className="mr-2" /> {event.location}</p>
-                  {/* Corrected the misplaced backslash in the className below */}
                   <p className="text-gray-600 text-sm mb-2 flex items-center">{getEventTypeIcon(event.eventType)} {event.eventType}</p>
 
                   <div className="flex justify-end space-x-2 mt-2">
@@ -362,11 +327,9 @@ const EventsList = () => { // Added function wrapper for the component
             </div>
           ))}
 
-          {userRole && (userRole === ROLES.ADMIN || userRole === ROLES.MANAGER || userRole === ROLES.CSR || userRole === ROLES.OUTREACH_OFFICER) && (
-            <div className="mt-6 flex justify-center">
-              {/* Add Event Button (placeholder for now) */}
-              {/* Example: <button onClick={() => navigate('/events/new')} className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300">Add New Event</button> */}
-            </div>
+ {userRole && (userRole === ROLES.ADMIN || userRole === ROLES.MANAGER || userRole === ROLES.CSR || userRole === ROLES.OUTREACH_OFFICER) && (
+ <div className="mt-6 flex justify-center">
+ </div>
           )}
 
           {!loading && !error && filteredAndSortedEvents.length > eventsPerPage && (

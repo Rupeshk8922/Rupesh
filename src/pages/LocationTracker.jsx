@@ -1,14 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import 'firebase/app';
-import { firebaseApp } from '../firebase/config';
-
+import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/authContext.jsx';
 
 function LocationTracker() {
   const [latitude, setLatitude] = useState(null);
   const [longitude, setLongitude] = useState(null);
-  const { user, loading, userRole } = useAuth();
-  const [hasAccess, setHasAccess] = useState(false);
+  const { userRole } = useAuth();
 
   useEffect(() => {
     if (userRole && ['admin', 'Manager', 'CSR', 'Outreach Officer'].includes(userRole)) {

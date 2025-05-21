@@ -1,48 +1,35 @@
-import React, { useEffect, useState } from 'react';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { useEffect, useState } from 'react';
+import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
-import { useAuth } from '../contexts/authContext'; // Corrected import path and hook
 import { useFetchCompanyData } from '../hooks/useFetchCompanyData.jsx';
+import { useAuth } from '../contexts/authContext';
 function CompanySettingsPage() {
-  const [loading, setLoading] = useState(true);
-  const [companyData, setCompanyData] = useState(null);
   const [message, setMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-  const { user, loading: authLoading, companyId } = useAuth(); // Corrected usage
+  const [errors, setErrors] = useState({});
+  const [isUpdating, setIsUpdating] = useState(false); // State for update loading
+ const [error, setError] = useState(null);
   const { companyId: authCompanyId } = useAuth(); // Use the correctly named hook
-  useEffect(() => {
-    const fetchCompany = async () => {
-      if (!companyId) {
-        setLoading(false);
-        setError(new Error('Company ID is not available.'));
- return;
-      }
-      try {
-        const companyRef = doc(db, 'companies', authCompanyId); // Use companyId from auth context
-        const snap = await getDoc(companyRef);
-        if (snap.exists()) setCompanyData(snap.data());
-      } catch (err) {
- console.error('Error fetching company data:', err);
-        setError(err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const { companyData, loading, refetchCompanyData } = useFetchCompanyData(authCompanyId);
+  const [localCompanyData, setLocalCompanyData] = useState(null);
 
-    fetchCompany();
-  }, [authCompanyId]); // Depend on companyId from auth context
+  useEffect(() => {
+    if (companyData) {
+      setLocalCompanyData(companyData);
+    }
+  }, [companyData]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setCompanyData((prev) => ({
-      ...prev,
- [name]: value,
+    setLocalCompanyData(prevData => ({
+      ...prevData,
+      [name]: value
     }));
   };
 
   const handleUpdate = async () => {
-    if (!authCompanyId) {
- setError(new Error('Company ID is not available for update.')); // Use error state for messaging
+    if (!authCompanyId || !localCompanyData) {
+      // Handle case where companyId or localCompanyData is not available
       return;
     }
 
@@ -51,24 +38,27 @@ function CompanySettingsPage() {
     if (!companyData?.industry?.trim()) newErrors.industry = 'Industry is required';
 
     setErrors(newErrors);
+
     if (Object.keys(newErrors).length > 0) return;
 
-    setLoading(true);
+    setIsUpdating(true);
+ setMessage(''); // Clear previous messages
+ setSuccessMessage('');
     try {
       const companyDocRef = doc(db, 'companies', authCompanyId); // Use companyId from auth context
       await updateDoc(companyDocRef, {
- ...companyData,
+        ...localCompanyData,
  updatedAt: new Date(),
       });
       setSuccessMessage('Company settings updated successfully!');
-      setMessage('Company info updated!');
+ refetchCompanyData(); // Re-fetch data to ensure UI is in sync
  } catch (err) {
-      console.error('Error updating company data:', err);
+ console.error('Error updating company data:', err);
       setError(err);
       setMessage('Update failed. Try again.');
     } finally {
       setErrors({});
-      setLoading(false);
+      setIsUpdating(false);
     }
   };
 
@@ -80,7 +70,7 @@ function CompanySettingsPage() {
     // mx-auto centers it, and p-4 adds padding. This basic structure is mobile-friendly.
     // Consider increasing padding on larger screens if needed (e.g., sm:p-6).
     <div className="max-w-xl mx-auto p-4 sm:p-6">
-      <h2 className="text-xl font-bold mb-4">Company Settings</h2>
+      <h2 className="text-2xl font-bold mb-6 text-gray-800">Company Settings</h2>
 
       {message && <p className="mb-4 text-sm text-blue-600">{message}</p>}
       {successMessage && <p className="text-green-600">{successMessage}</p>}
@@ -104,7 +94,7 @@ function CompanySettingsPage() {
             <input
               type="text"
               name={field}
-              value={companyData[field] || ''}
+              value={localCompanyData?.[field] || ''}
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded"
             />
@@ -118,7 +108,7 @@ function CompanySettingsPage() {
           <input
             type="text"
             name="industry"
-            value={companyData?.industry || ''}
+            value={localCompanyData?.industry || ''}
             onChange={handleChange}
             className="w-full px-3 py-2 border rounded"
           />
@@ -130,9 +120,10 @@ function CompanySettingsPage() {
           // are appropriate for touch targets on mobile. The current classes are generally
           // suitable, but can be adjusted responsively if necessary (e.g., sm:text-lg).
           type="submit"
+          disabled={isUpdating || loading || !localCompanyData} // Disable while loading or updating
           className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
         >
-          Save Changes
+          {isUpdating ? 'Saving...' : 'Save Changes'}
         </button>
       </form>
     </div>

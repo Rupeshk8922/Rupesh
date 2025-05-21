@@ -1,10 +1,6 @@
-jsx
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 // Assuming you have Firebase configured and exported
-
-// import { auth, db } from '../firebase/config';
-// import { addVolunteer } from '../firebase/services/firestoreService'; // Corrected import path
 
 
 function SignupVolunteerPage() {
@@ -23,8 +19,6 @@ function SignupVolunteerPage() {
   const [loading, setLoading] = useState(false);
   const [submissionError, setSubmissionError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
-
-  const navigate = useNavigate();
 
   // Basic validation logic
   const validateForm = () => {
@@ -150,9 +144,6 @@ function SignupVolunteerPage() {
       setSuccessMessage('Thank you for signing up! Your application will be reviewed.');
       // Clear form after successful submission
       setFormData({
-        fullName: '',
-        email: '',
-        phone: '',
         availability: [],
         interests: '',
         preferredLocation: '',

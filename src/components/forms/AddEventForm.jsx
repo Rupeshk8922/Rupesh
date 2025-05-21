@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { collection, addDoc } from 'firebase/firestore';
 import { db } from '../../firebase/config'; // Adjust path if needed
 import { useAuth } from '../../contexts/authContext'; // Correct import
-import { useEvents } from '../../hooks/useEvents.jsx';
-function AddEventForm() {
+function AddEventForm() { // Assuming this is a React functional component
   const [formData, setFormData] = useState({
     name: '',
     eventType: '',

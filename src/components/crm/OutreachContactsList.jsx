@@ -1,6 +1,6 @@
 // src/pages/OutreachContactsList.jsx
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../firebase';

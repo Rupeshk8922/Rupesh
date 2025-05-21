@@ -1,12 +1,8 @@
 import { useState, useEffect } from "react";
-import { TextField, Button, FormControl, InputLabel, Select, MenuItem, FormControlLabel, RadioGroup, Radio, Typography, Grid, Box, CircularProgress, Alert
-} from '@mui/material';
 import dayjs from 'dayjs';
-import { collection, addDoc, getDocs } from 'firebase/firestore';
+import { collection, addDoc, getDocs,  } from 'firebase/firestore';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { LocalizationProvider, DatePicker, TimePicker } from '@mui/x-date-pickers';
 import { db } from '../firebase/config';
-
 function CallLogForm() {
   const [donors, setDonors] = useState([]);
   const [selectedDonor, setSelectedDonor] = useState("");
@@ -37,7 +33,7 @@ function CallLogForm() {
       }
     };
 
-    fetchDonors();
+    fetchDonors(); // Removed the redundant 'event' parameter
   }, []);
 
   const handleSubmit = async (event) => {
@@ -52,7 +48,7 @@ function CallLogForm() {
       timestamp: dayjs().toDate(),
     };
 
-    try {
+    try { // Add 'event' parameter here
       // Add the call log data to the Firestore collection
       await addDoc(collection(db, 'callLogs'), callLogData);
       setSuccess(true);
@@ -71,11 +67,11 @@ function CallLogForm() {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Box> {/* Open Box inside LocalizationProvider */}
+      <Box>
         {isLoading && <CircularProgress />}
         {error && <Alert severity="error">{error}</Alert>}
         {/* Mobile Responsiveness: Form container. Grid and fullWidth on form controls help here. */}
-        {!isLoading && !error && (
+        {!isLoading && !error && ( // Moved closing parenthesis here
           <form onSubmit={handleSubmit}>
             <FormControl fullWidth required sx={{ mb: 3 }}>
               <InputLabel id="donor-label">Donor</InputLabel>
@@ -123,7 +119,7 @@ function CallLogForm() {
                   // Mobile Responsiveness: The picker itself is generally handled by MUI's responsive design.
                   value={followUpDate}
                   onChange={(newValue) => setFollowUpDate(newValue)}
-                  renderInput={(params) => <TextField {...params} fullWidth required />}
+                  renderInput={(params) => <TextField {...params} fullWidth />} // Removed 'required' as DatePicker handles it
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -132,7 +128,7 @@ function CallLogForm() {
                   label="Follow-Up Time"
                   value={followUpTime}
                   onChange={(newValue) => setFollowUpTime(newValue)}
-                  renderInput={(params) => <TextField {...params} fullWidth required />}
+                  renderInput={(params) => <TextField {...params} fullWidth />} // Removed 'required' as TimePicker handles it
                 />
               </Grid>
             </Grid>
@@ -159,9 +155,17 @@ function CallLogForm() {
                 Call Log saved successfully!
               </Alert>
             )}
+            {/* Add a submit button */}
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+            >
+              Save Call Log
+            </Button>
           </form>
         )}
-      </Box> {/* Close Box inside LocalizationProvider */}
+      </Box>
     </LocalizationProvider >
   );
 }

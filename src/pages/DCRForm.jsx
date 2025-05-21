@@ -1,22 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Autocomplete,
-  TextField,
-  Button,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  CircularProgress,
-  Alert,
-  Box,
-  Paper,
-  Typography,
+
+
+
 } from '@mui/material';
 import { useAuth } from '../contexts/authContext'; // Assuming useAuth is in this path
+import { addDoc, collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebase/config'; // Adjust path as necessary
+import { Autocomplete, Button, Select, MenuItem, FormControl, InputLabel, CircularProgress, Alert, Box, Paper, TextField, Typography } from '@mui/material';
 
-function DCRForm() {
+function DCRForm({ TextField, Typography }) {
   const [donors, setDonors] = useState([]);
   const [selectedDonor, setSelectedDonor] = useState(null);
   const [callOutcome, setCallOutcome] = useState('');

@@ -1,10 +1,7 @@
 import { useState } from 'react';
-import { collection, addDoc } from 'firebase/firestore';
+import { addDoc, collection } from 'firebase/firestore';
 import { db } from '../../firebase/config.js';
 import { useAuth } from '../../contexts/authContext';
-
-const predefinedInterests = ['Event', 'Volunteer', 'Donation', 'General Inquiry'];
-const predefinedStatuses = ['New', 'Contacted', 'Qualified', 'Lost', 'Converted'];
 
 const AddLeadForm = () => {
   const { user } = useAuth();
@@ -34,15 +31,14 @@ const AddLeadForm = () => {
 
   // Handle form field changes
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value } = e.target; // Use the 'value' variable here
 
     // TODO: Consider adding debouncing for validation on change, especially for text inputs,
     // to improve performance and user experience on slower devices or networks.
     // This is particularly relevant for mobile responsiveness.
 
     // Perform validation on change
-    if (name === 'name') {
+    if (name === 'name') { // Corrected condition from 'value' to 'name'
       validateName(value);
     } else if (name === 'email') {
       validateEmail(value);
@@ -52,6 +48,8 @@ const AddLeadForm = () => {
       validateInterest(value);
     }
   };
+  // Use the 'value' variable here inside the handleChange function scope
+  // setFormData((prev) => ({ ...prev, [name]: value })); 
 
   // Combine all error states to check if there are any validation errors that would prevent submission
   // Note: This check should encompass all relevant validation states in your component.
@@ -93,9 +91,9 @@ const AddLeadForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // setIsLoading(true); // Uncomment and manage loading state for UI feedback
+    // setIsLoading(true); 
 
-    // Perform validation before submission
+    // Perform validation
     validateName(formData.name);
     validateEmail(formData.email);
     validateInterest(formData.interest);
@@ -138,7 +136,7 @@ const AddLeadForm = () => {
     } catch (error) {
       console.error('Error adding lead:', error);
     }
-    // finally { setIsLoading(false); } // Uncomment to manage loading state
+    // finally { setIsLoading(false); } 
   };
 
   return (
@@ -218,10 +216,12 @@ const AddLeadForm = () => {
             onBlur={() => validateInterest(formData.interest)}
             required
           >
+            {/* TODO: Fetch interests dynamically */}
             <option value="">Select Interest</option>
-            {predefinedInterests.map(interest => (
+            {/* Example rendering of predefined interests if they were used: */}
+            {/* {predefinedInterests.map(interest => (
               <option key={interest} value={interest}>{interest}</option>
-            ))}
+            ))} */}
           </select>
           {interestError && <p className="text-red-500 text-sm mt-1">{interestError}</p>}
         </div>

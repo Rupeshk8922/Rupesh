@@ -1,9 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { doc, deleteDoc } from 'firebase/firestore';
 import { db } from '../../firebase/config';
 import { useAuth } from '../../contexts/authContext';
-import useVolunteers from '../../hooks/useVolunteers.jsx'; 
+import useVolunteers from '../../hooks/useVolunteers';
 
 // Predefined options for filters and roles
 const ROLES = {
@@ -18,10 +18,7 @@ const AVAILABILITY_OPTIONS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Fri
 const INTEREST_OPTIONS = ['Education', 'Health', 'Environment', 'Community Support', 'Fundraising', 'Logistics'];
 // TODO: Fetch status options from a central source or configuration
 const STATUS_OPTIONS = ['Active', 'Inactive', 'On Leave']; // Added 'On Leave' from EditUserPage
-
-const DEFAULT_INTEREST_ICON = '✨'; // Default icon for interests
-const TOP_VOLUNTEER_THRESHOLD = 5; 
-import AssignVolunteerModal from '../AssignVolunteerModal'; 
+const DEFAULT_INTEREST_ICON = '✨';
 import ConfirmDeleteModal from '@/components/ConfirmDeleteModal';
 
 const VolunteersList = () => {
@@ -190,6 +187,7 @@ const VolunteersList = () => {
     });
   }, [volunteers, filters, sort]);
 
+ const TOP_VOLUNTEER_THRESHOLD = 5; // Define threshold locally or import
   // --- Pagination Logic ---
   const indexOfLastVolunteer = currentPage * volunteersPerPage;
   const indexOfFirstVolunteer = indexOfLastVolunteer - volunteersPerPage;
@@ -235,7 +233,7 @@ const VolunteersList = () => {
       <div className="mb-6 bg-white p-4 sm:p-6 rounded-xl shadow-lg">
         <h3 className="text-xl font-bold mb-4 flex items-center text-gray-800"><FaFilter className="mr-3 text-blue-600 text-2xl" />Filter & Sort Volunteers</h3>
 
-        {/* Search Bar */}
+
         <div className="mb-4">
           <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-2 flex items-center"><FaSearch className="mr-2 text-gray-500" />Search by Name or Email</label>
           <input
@@ -249,9 +247,8 @@ const VolunteersList = () => {
           />
         </div>
 
-        {/* Advanced Filters Grid */}
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-          {/* Availability Filter */}
           <div>
             <label htmlFor="availability" className="block text-sm font-medium text-gray-700 mb-2 flex items-center"><FaCalendarAlt className="mr-2 text-purple-600" />Availability</label>
             <select
@@ -268,7 +265,6 @@ const VolunteersList = () => {
             </select>
           </div>
 
-          {/* Interests Filter */}
           <div>
             <label htmlFor="interests" className="block text-sm font-medium text-gray-700 mb-2 flex items-center"><FaTags className="mr-2 text-green-600" />Interests</label>
             <select
@@ -285,7 +281,6 @@ const VolunteersList = () => {
             </select>
           </div>
 
-          {/* Location Filter */}
           <div>
             <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-2 flex items-center"><FaMapMarkerAlt className="mr-2 text-red-600" />Location</label>
             <input
@@ -299,7 +294,6 @@ const VolunteersList = () => {
             />
           </div>
 
-          {/* Status Filter */}
           <div>
             <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-2 flex items-center"><FaUsers className="mr-2 text-indigo-600" />Status</label>
             <select
@@ -317,7 +311,6 @@ const VolunteersList = () => {
           </div>
         </div>
 
-        {/* Sort Controls */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-6 mt-4">
           <h3 className="text-lg font-semibold flex items-center text-gray-800"><FaSort className="mr-2 text-orange-600" />Sort By:</h3>
           <div className="flex items-center space-x-2">
@@ -342,7 +335,7 @@ const VolunteersList = () => {
         </div>
       </div>
 
-      {/* View Toggle and Add Button */}
+
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 space-y-4 sm:space-y-0">
         <button
           onClick={() => setCurrentView(currentView === 'table' ? 'card' : 'table')}
@@ -362,7 +355,6 @@ const VolunteersList = () => {
         )}
       </div>
 
-      {/* Volunteer List Display */}
       {!loading && !error && filteredAndSortedVolunteers.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-10 bg-white rounded-xl shadow-md">
           <p className="text-xl text-gray-700 font-semibold mb-4">No volunteers found with the current filters.</p>
@@ -540,7 +532,6 @@ const VolunteersList = () => {
             </div>
           )}
 
-          {/* Pagination Controls */}
           {filteredAndSortedVolunteers.length > volunteersPerPage && (
             <div className="mt-8 flex justify-center items-center space-x-3 text-gray-700">
               <button
@@ -563,20 +554,13 @@ const VolunteersList = () => {
         </>
       )}
 
-      {/* Modals */}
       <AssignVolunteerModal
         isOpen={isAssignModalOpen}
         onClose={handleCloseAssignModal}
         volunteerId={selectedVolunteerId}
       />
 
-      <ConfirmDeleteModal
-        isOpen={isDeleteModalOpen}
-        onCancel={() => setIsDeleteModalOpen(false)}
-        onConfirm={handleDeleteConfirm}
-        itemName={volunteerToDeleteName} // Use itemName for a more generic modal
-        itemType="Volunteer" // Specify type of item being deleted
-      />
+
     </div>
   );
 };

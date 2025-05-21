@@ -1,5 +1,5 @@
 import { createContext } from 'react';
-import { firebaseApp } from '../firebase/config'; // Import your Firebase app instance
+import { firebaseApp } from '@/firebase/config'; // Import your Firebase app instance
 
 export const FirebaseContext = createContext(firebaseApp);
 

@@ -3,27 +3,28 @@ import { useEvents } from '../hooks/useEvents.jsx';
 import {
   isPast,
   isFuture,
-  startOfMonth,
-  endOfMonth,
-  startOfQuarter,
-  endOfQuarter,
   startOfYear,
   endOfYear,
   isWithinInterval,
   parseISO,
+  startOfMonth,
+  endOfMonth,
+  startOfQuarter,
+  endOfQuarter,
+  format,
 } from 'date-fns';
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
   ResponsiveContainer,
   PieChart,
   Pie,
   Cell,
+  Tooltip,
+  Legend,
+  LineChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Line,
   BarChart,
   Bar,
 } from 'recharts';
@@ -31,7 +32,8 @@ import { useAuth } from '../contexts/authContext'; // Assuming this hook provide
 
 const EventAnalyticsPage = () => {
   const { events, loading, error } = useEvents();
-  const { companyId } = useAuth();
+  const { user } = useAuth(); // Destructure user from useAuth
+  const companyId = user?.companyId; // Access companyId from the authenticated user
 
   const [metrics, setMetrics] = useState({
     totalEvents: 0,
@@ -54,28 +56,37 @@ const EventAnalyticsPage = () => {
 
     const now = new Date();
     return events.filter(event => {
+      // Ensure event.date is a Firebase Timestamp and convert it
       const eventDate = event.date && typeof event.date.toDate === 'function' ? new Date(event.date.toDate()) : null;
       if (!eventDate) return false;
 
+      let start, end;
+
       switch (dateRange) {
         case 'thisMonth':
-          return eventDate >= startOfMonth(now) && eventDate <= endOfMonth(now);
+          start = startOfMonth(now);
+          end = endOfMonth(now);
+          break;
         case 'thisQuarter':
-          return eventDate >= startOfQuarter(now) && eventDate <= endOfQuarter(now);
+          start = startOfQuarter(now);
+          end = endOfQuarter(now);
+          break;
         case 'thisYear':
-          return eventDate >= startOfYear(now) && eventDate <= endOfYear(now);
+          start = startOfYear(now);
+          end = endOfYear(now);
+          break;
         case 'custom':
-          const start = customStartDate ? parseISO(customStartDate) : null;
-          const end = customEndDate ? parseISO(customEndDate) : null;
-          // Only filter if both start and end dates are provided for custom range
-          if (start && end) {
-            return isWithinInterval(eventDate, { start, end });
-          }
-          return true; // If custom range selected but dates not set, show all
+          start = customStartDate ? parseISO(customStartDate) : null;
+          end = customEndDate ? parseISO(customEndDate) : null;
+          if (!start || !end) return true; // If custom range selected but dates not fully set, include all events
+          break;
         case 'allTime':
         default:
-          return true;
+          return true; // No date filtering
       }
+
+      // Filter by date range for all cases except 'allTime' where start and end are null
+      return isWithinInterval(eventDate, { start, end });
     });
   }, [events, dateRange, customStartDate, customEndDate]);
 
@@ -94,7 +105,6 @@ const EventAnalyticsPage = () => {
       return;
     }
 
-    const now = new Date();
     const upcomingEvents = filteredEvents.filter(
       event =>
         event.date &&
@@ -115,7 +125,7 @@ const EventAnalyticsPage = () => {
     let totalCapacity = 0;
     const eventTypeCounts = {};
     const eventLocationCounts = {};
-    let filteredTotalEvents = filteredEvents.length;
+    const filteredTotalEvents = filteredEvents.length;
 
     filteredEvents.forEach(event => {
       if (event.volunteerCapacity && typeof event.volunteerCapacity === 'number') {
@@ -138,9 +148,9 @@ const EventAnalyticsPage = () => {
 
       let dateKey;
       if (dateRange === 'thisMonth' || dateRange === 'custom') {
-        dateKey = `${eventDate.getFullYear()}-${String(eventDate.getMonth() + 1).padStart(2, '0')}-${String(eventDate.getDate()).padStart(2, '0')}`;
+        dateKey = format(eventDate, 'yyyy-MM-dd'); // Format for day
       } else {
-        dateKey = `${eventDate.getFullYear()}-${String(eventDate.getMonth() + 1).padStart(2, '0')}`; // Year-Month for other ranges
+        dateKey = format(eventDate, 'yyyy-MM'); // Format for month
       }
 
       if (!acc[dateKey]) {
@@ -172,7 +182,7 @@ const EventAnalyticsPage = () => {
     const eventTypeBreakdownData = Object.keys(eventTypeCounts).map(type => ({ name: type, value: eventTypeCounts[type] }));
     const eventsByLocationData = Object.keys(eventLocationCounts).map(location => ({ name: location, count: eventLocationCounts[location] }));
 
-    const averageVolunteerCapacity = filteredTotalEvents > 0 ? totalCapacity / filteredTotalEvents : 0;
+    const averageVolunteerCapacity = filteredTotalEvents > 0 ? (totalCapacity / filteredTotalEvents).toFixed(1) : 0;
 
     let mostPopularEventType = 'N/A';
     let maxCount = 0;
@@ -188,7 +198,7 @@ const EventAnalyticsPage = () => {
       upcomingEvents: upcomingEvents.length,
       completedEvents: completedEvents.length,
       canceledEvents: canceledEvents.length,
-      averageVolunteerCapacity: averageVolunteerCapacity.toFixed(1),
+      averageVolunteerCapacity: averageVolunteerCapacity,
       mostPopularEventType,
     });
 
@@ -204,10 +214,13 @@ const EventAnalyticsPage = () => {
       { name: 'Canceled', value: canceledEvents.length },
     ];
     setEventStatusData(eventStatusDistributionData);
-  }, [filteredEvents, dateRange, customStartDate, customEndDate]); // Depend on filteredEvents
+  }, [filteredEvents, dateRange, customStartDate, customEndDate]); // Depend on filteredEvents and date range filters
+
+  // Define colors for Pie chart cells
+  const PIE_COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AF19FF', '#FF19A0']; // Example colors
 
   if (!companyId) {
-    return <div className="p-4 text-center text-gray-600">Please select a company.</div>;
+    return <div className="p-4 text-center text-gray-600">Please log in to view event analytics.</div>;
   }
 
   if (loading) {
@@ -218,11 +231,8 @@ const EventAnalyticsPage = () => {
     return <div className="p-4 text-center text-red-600">Error loading event data: {error.message}</div>;
   }
 
-  // Define colors for Pie chart cells
-  const PIE_COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AF19FF', '#FF19A0']; // Example colors
-
   return (
-    <div className="container mx-auto p-4 sm:p-6 min-h-screen">
+    <div className="container mx-auto p-4 sm:p-6 min-h-screen bg-gray-50">
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-gray-800">Event Analytics</h2>
         <select
@@ -267,7 +277,7 @@ const EventAnalyticsPage = () => {
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         {/* Total Events Card */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex items-center mb-4">
@@ -339,19 +349,24 @@ const EventAnalyticsPage = () => {
       <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         {/* Events Over Time Chart */}
         <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 col-span-1">
-          <h3 className="text-lg font-semibold mb-4 text-gray-800">Events Over Time ({dateRange})</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={chartData.eventsOverTime}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-              <XAxis dataKey="date" />
-              <YAxis />
-              <Tooltip formatter={(value, name) => [value, `${name} Events`]} />
-              <Legend formatter={value => <span className="text-gray-700">{value} Events</span>} />
-              <Line type="monotone" dataKey="upcoming" stroke="#4CAF50" name="Upcoming" />
-              <Line type="monotone" dataKey="completed" stroke="#2196F3" name="Completed" />
-              <Line type="monotone" dataKey="canceled" stroke="#F44336" name="Canceled" />
-            </LineChart>
-          </ResponsiveContainer>
+          <h3 className="text-lg font-semibold mb-4 text-gray-800">Events Over Time ({dateRange === 'custom' && (customStartDate || customEndDate) ? 'Custom' : dateRange})</h3>
+          {chartData.eventsOverTime.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={chartData.eventsOverTime} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <XAxis dataKey="date" />
+                <YAxis allowDecimals={false} />
+                <Tooltip formatter={(value, name) => [value, `${name} Events`]} />
+                <Legend formatter={value => <span className="text-gray-700">{value} Events</span>} />
+                <Line type="monotone" dataKey="upcoming" stroke="#4CAF50" name="Upcoming" activeDot={{ r: 8 }} />
+                <Line type="monotone" dataKey="completed" stroke="#2196F3" name="Completed" activeDot={{ r: 8 }} />
+                <Line type="monotone" dataKey="canceled" stroke="#F44336" name="Canceled" activeDot={{ r: 8 }} />
+                <Line type="monotone" dataKey="total" stroke="#8884d8" name="Total" activeDot={{ r: 8 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <p className="text-gray-600 text-center py-10">No event data available for this time range.</p>
+          )}
           <p className="text-sm text-gray-500 mt-2 text-center">
             {dateRange === 'thisMonth' || dateRange === 'custom'
               ? 'Events by Day'
@@ -373,31 +388,32 @@ const EventAnalyticsPage = () => {
                   fill="#8884d8"
                   dataKey="value"
                   label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
-                  tooltipType="none"
+                  labelLine={false}
+                  animationDuration={500}
                 >
-                  <Tooltip
-                    cursor={{ fill: 'transparent' }}
-                    content={({ active, payload }) => {
-                      if (active && payload && payload.length) {
-                        const data = payload[0].payload;
-                        return (
-                          <div className="bg-white p-2 border border-gray-300 shadow-md">
-                            {`${data.name}: ${data.value} (${(data.percent * 100).toFixed(0)}%)`}
-                          </div>
-                        );
-                      }
-                    }}
-                  />
                   {chartData.eventTypeBreakdown.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                    <Cell key={`cell-type-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip />
+                <Tooltip
+                  cursor={{ fill: 'transparent' }}
+                  content={({ active, payload }) => {
+                    if (active && payload && payload.length) {
+                      const data = payload[0].payload;
+                      return (
+                        <div className="bg-white p-2 border border-gray-300 shadow-md">
+                          {`${data.name}: ${data.value} (${(data.percent * 100).toFixed(0)}%)`}
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
                 <Legend />
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <p className="text-gray-600">No event type data available for this period.</p>
+            <p className="text-gray-600 text-center py-10">No event type data available for this period.</p>
           )}
         </div>
 
@@ -415,31 +431,32 @@ const EventAnalyticsPage = () => {
                   fill="#8884d8"
                   dataKey="value"
                   label={({ name, value, percent }) => `${name}: ${value} (${(percent * 100).toFixed(0)}%)`}
-                  tooltipType="none"
+                  labelLine={false}
+                  animationDuration={500}
                 >
-                  <Tooltip
-                    cursor={{ fill: 'transparent' }}
-                    content={({ active, payload }) => {
-                      if (active && payload && payload.length) {
-                        const data = payload[0].payload;
-                        return (
-                          <div className="bg-white p-2 border border-gray-300 shadow-md">
-                            {`${data.name}: ${data.value} (${(data.percent * 100).toFixed(0)}%)`}
-                          </div>
-                        );
-                      }
-                    }}
-                  />
                   <Cell key={`cell-upcoming`} fill="#4CAF50" />
                   <Cell key={`cell-completed`} fill="#2196F3" />
                   <Cell key={`cell-canceled`} fill="#F44336" />
                 </Pie>
-                <Tooltip />
+                <Tooltip
+                  cursor={{ fill: 'transparent' }}
+                  content={({ active, payload }) => {
+                    if (active && payload && payload.length) {
+                      const data = payload[0].payload;
+                      return (
+                        <div className="bg-white p-2 border border-gray-300 shadow-md">
+                          {`${data.name}: ${data.value} (${(data.percent * 100).toFixed(0)}%)`}
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
                 <Legend />
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <p className="text-gray-600">No event status data available for this period.</p>
+            <p className="text-gray-600 text-center py-10">No event status data available for this period.</p>
           )}
         </div>
 
@@ -448,10 +465,10 @@ const EventAnalyticsPage = () => {
           <h3 className="text-lg font-semibold mb-4 text-gray-800">Events by Location</h3>
           {chartData.eventsByLocation.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={chartData.eventsByLocation}>
+              <BarChart data={chartData.eventsByLocation} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
+                <XAxis dataKey="name" interval={0} angle={-30} textAnchor="end" height={60} />
+                <YAxis allowDecimals={false} />
                 <Tooltip
                   cursor={{ fill: 'rgba(0, 0, 0, 0.1)' }}
                   content={({ active, payload }) => {
@@ -461,6 +478,7 @@ const EventAnalyticsPage = () => {
                         <div className="bg-white p-2 border border-gray-300 shadow-md">{`${data.name}: ${data.count} events`}</div>
                       );
                     }
+                    return null;
                   }}
                 />
                 <Legend />
@@ -468,7 +486,7 @@ const EventAnalyticsPage = () => {
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <p className="text-gray-600">No event location data available for this period.</p>
+            <p className="text-gray-600 text-center py-10">No event location data available for this period.</p>
           )}
         </div>
       </div>

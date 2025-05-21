@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { collection, getDocs, query, where, orderBy, limit, startAfter } from 'firebase/firestore';
-import { db } from '../firebase/config'; // Adjust path as needed
+import { db } from '../firebase/config';
 import { useAuth } from '../contexts/authContext.jsx'; // Corrected hook name and path
 import { Link } from 'react-router-dom';
 

@@ -1,6 +1,3 @@
-import SidebarLayout from './SidebarLayout.jsx'; // Adjust the path if needed
-// Update import paths for hooks in src/hooks that were renamed from .js to .jsx
-
 function DashboardLayout({ role, children }) {
   const allowedRoles = ['admin', 'outreach', 'csr', 'telecaller', 'volunteer'];
 
@@ -14,7 +11,7 @@ function DashboardLayout({ role, children }) {
 
   return (
     <div className="flex h-screen">
-      <SidebarLayout role={role} />
+ <SidebarLayout role={role} />
       <main className="flex-1 overflow-y-auto p-4 bg-gray-50">
         {children}
       </main>

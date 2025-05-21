@@ -3,7 +3,6 @@ import Modal from "react-modal";
 import { collection, query, where, getDocs, doc, updateDoc, getDoc } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { useAuth } from "../contexts/authContext.jsx";
-import { useSubscriptionType } from "../hooks/useSubscription.jsx";
 // Set app element for accessibility
 Modal.setAppElement('#root');
 
@@ -15,7 +14,6 @@ const AssignVolunteerModal = ({ isOpen, onClose, volunteerId }) => {
   const [isAssigning, setIsAssigning] = useState(false);
 
   const { user: currentUser } = useAuth(); // Using the correct authContext
-  const subscription = useSubscriptionType(); // Using SubscriptionContext
 
   useEffect(() => {
     const fetchEvents = async () => {

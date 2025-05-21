@@ -29,8 +29,8 @@ if (window.location.hostname === "localhost") {
 }
 
 
-const sendPasswordReset = async (email) => {
+const firebaseSendPasswordResetEmail = async (email) => { // Renamed the function
  await sendPasswordResetEmail(auth, email);
 };
 
-export { firebaseApp, sendPasswordReset, db, auth, functions };
+export { firebaseApp, firebaseSendPasswordResetEmail, db, auth, functions }; // Export the renamed function

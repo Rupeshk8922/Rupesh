@@ -9,7 +9,7 @@ const validStatuses = ['Active', 'Inactive', 'On Leave'];
 
 function EditUserPage() {
   const { userId } = useParams();
-  const { currentUser, companyId, userRole } = useAuth();
+  const { companyId, userRole } = useAuth();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({

@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 
 const NotificationSettings = () => {
   // State to manage notification preferences
@@ -24,8 +26,8 @@ const NotificationSettings = () => {
   //       //   setPreferences(userDoc.data().notificationPreferences);
   //       // }
   //       setLoading(false);
-  //     } catch (err) {
-  //       setError('Failed to load preferences.');
+  //     } catch {\n
+  //       setError('Failed to load preferences.'); // Removed unused 'err'
   //       setLoading(false);
   //     }
   //   };
@@ -56,8 +58,8 @@ const NotificationSettings = () => {
       setSuccess(true);
       setError(null); // Clear previous errors
       setLoading(false);
-    } catch (err) {
-      setError('Failed to save preferences.');
+    } catch {\n
+      setError('Failed to save preferences.'); // Removed unused 'err'
       setSuccess(false); // Clear previous success
       setLoading(false);
     }

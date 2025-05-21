@@ -1,21 +1,9 @@
-import React, { useState } from 'react';
-import { TextField, Button, Container, Typography, Box } from '@mui/material';
-import { styled } from '@mui/system';
+import { useState } from 'react';
+import { styled, Box } from '@mui/system';
 import { collection, addDoc } from 'firebase/firestore';
 import { db } from '../firebase/config'; // Import the initialized Firebase app instance
 
-const FormContainer = styled(Container)({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '1rem',
-  maxWidth: '400px',
-  margin: '2rem auto',
-  padding: '1rem',
-  boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
-  borderRadius: '8px',
-});
-
-const StyledTextField = styled(TextField)({
+const StyledForm = styled('form')({
   '& .MuiOutlinedInput-root': {
     '& fieldset': {
       borderColor: '#ccc',
@@ -27,6 +15,10 @@ const StyledTextField = styled(TextField)({
       borderColor: '#007bff',
     },
   },
+});
+
+const StyledTextField = styled('TextField')({
+  // Your styling here
 });
 
 function AddDonorForm() {
@@ -68,8 +60,7 @@ function AddDonorForm() {
     return isValid;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     setMessage(''); // Clear previous messages
 
     if (validateForm()) {
@@ -91,10 +82,7 @@ function AddDonorForm() {
   };
 
   return (
-    <FormContainer component="form" onSubmit={handleSubmit}>
-      <Typography variant="h5" component="h2" align="center" gutterBottom>
-        Add Donor
-      </Typography>
+    <StyledForm onSubmit={handleSubmit}>      
       <StyledTextField
         fullWidth
         label="Donor Name"
@@ -128,9 +116,7 @@ function AddDonorForm() {
         helperText={formError.emailAddress}
         aria-label="Email Address"
       />
-      <Button type="submit" variant="contained" color="primary" disabled={isLoading}>
-        {isLoading ? 'Adding...' : 'Add Donor'}
-      </Button>
+      
       {message && (
         <Box mt={2}>
           <Typography color={message.type === 'success' ? 'green' : 'red'}>
@@ -138,7 +124,7 @@ function AddDonorForm() {
           </Typography>
         </Box>
       )}
-    </FormContainer>
+    </StyledForm>
   );
 }
 

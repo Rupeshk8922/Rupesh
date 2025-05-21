@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
@@ -18,7 +18,6 @@ function EditOutreachContactPage() {
     assignedTo: '',
   });
 
-  const [email, setEmail] = useState(''); // State for email as it's not directly editable
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
@@ -45,7 +44,6 @@ function EditOutreachContactPage() {
             tags: data.tags?.join(', ') || '',
             assignedTo: data.assignedTo || '',
           });
-          setEmail(data.email || ''); // Set email separately
         } else {
           setError("Contact not found.");
         }

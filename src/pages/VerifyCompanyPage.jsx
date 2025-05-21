@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom'; // Import Link for navigation
+import { useState } from 'react';
 import useOtpVerification from '../hooks/useOtpVerification';
 
 function VerifyCompanyPage() {
@@ -7,10 +6,7 @@ function VerifyCompanyPage() {
     useOtpVerification();
   const [formError, setFormError] = useState(null); // Local state for form validation errors
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    // Client-side validation
+  const handleSubmit = async () => {
     if (!otp) {
       setFormError('OTP is required.');
       return;
@@ -26,10 +22,7 @@ function VerifyCompanyPage() {
     // For now, we'll use a placeholder.
     const companyId = 'placeholderCompanyId'; // Replace with actual logic to get companyId
 
-    const success = await handleVerifyOtp(companyId, otp);
-    if (success) {
-      setTimeout(() => navigate('/'), 2000); // Redirect to login page after success
-    }
+    await handleVerifyOtp(companyId, otp);
   };
 
   return (
@@ -49,7 +42,7 @@ function VerifyCompanyPage() {
               id="otp"
               className="input-field"
               value={otp}
-              onChange={(e) => setOtp(e.target.value)}
+              onChange={(event) => setOtp(event.target.value)}
               required
               maxLength={6}
               pattern="\d{6}" // Strictly enforce exactly 6 digits
@@ -60,9 +53,7 @@ function VerifyCompanyPage() {
           </button>
           <p className="login-link">
             Go back to{' '}
-            <Link to="/" className="text-blue-600 hover:underline">
-              Login
-            </Link>
+            <a href="/" className="text-blue-600 hover:underline">Login</a>
           </p>
         </form>
       </div>

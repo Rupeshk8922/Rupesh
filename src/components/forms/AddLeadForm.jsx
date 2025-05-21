@@ -1,19 +1,16 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { collection, addDoc } from 'firebase/firestore';
+import { useAuth } from '@/hooks/useAuth';
 import { db } from '../../firebase/config'; // Adjust the path as needed
-import { useauthContext } from '../../contexts/authContext'; // Adjust the path as needed
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
-import { useAuth } from '../../contexts/authContext.jsx'; // Adjust the path as needed
 // Ensure userRole is available
 function AddLeadForm() {
-  const { companyId } = useAuth();
   const navigate = useNavigate(); // Get the navigate function
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
     phone: '',
     status: '', // e.g., 'New', 'Contacted', 'Qualified', 'Disqualified'
-    source: '', // e.g., 'Website', 'Referral', 'Event'
     notes: '',
   });
 
@@ -21,13 +18,12 @@ function AddLeadForm() {
   const [emailError, setEmailError] = useState('');
   const [phoneError, setPhoneError] = useState('');
   const [statusError, setStatusError] = useState('');
-  const [sourceError, setSourceError] = useState('');
   const [notesError, setNotesError] = useState('');
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
-  const { userRole } = useAuth(); // Get the userRole
+  const { userRole, companyId } = useAuth(); // Get the userRole and companyId
 
   // Validation functions (simplified for brevity, add more robust logic as needed)
   const validateFullName = (name) => {
@@ -56,10 +52,6 @@ function AddLeadForm() {
     return '';
   };
 
-  const validateSource = (source) => {
-    // Source is optional, no validation needed unless required later
-    return '';
-  };
 
   const validateNotes = (notes) => {
     if (notes.length > 500) return 'Notes cannot exceed 500 characters.';
@@ -83,12 +75,6 @@ function AddLeadForm() {
         break;
       case 'status':
         setStatusError(validateStatus(value));
-        break;
-      case 'source':
-        setSourceError(validateSource(value));
-        break;
-      case 'notes':
-        setNotesError(validateNotes(value));
         break;
       default:
         break;
@@ -123,12 +109,6 @@ function AddLeadForm() {
       isValid = false;
     }
 
-    const sourceErr = validateSource(formData.source);
-    if (sourceErr) {
-      newErrors.source = sourceErr;
-      isValid = false;
-    }
-
     const notesErr = validateNotes(formData.notes);
     if (notesErr) {
       newErrors.notes = notesErr;
@@ -139,7 +119,6 @@ function AddLeadForm() {
     setEmailError(newErrors.email || '');
     setPhoneError(newErrors.phone || '');
     setStatusError(newErrors.status || '');
-    setSourceError(newErrors.source || '');
     setNotesError(newErrors.notes || '');
 
     return isValid;
@@ -147,7 +126,7 @@ function AddLeadForm() {
 
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+      e.preventDefault();
     setError(null);
     setSuccessMessage(null);
 
@@ -175,7 +154,6 @@ function AddLeadForm() {
         email: '',
         phone: '',
         status: '',
-        source: '',
         notes: '',
       });
       // Clear individual errors after successful submission
@@ -183,15 +161,12 @@ function AddLeadForm() {
       setEmailError('');
       setPhoneError('');
       setStatusError('');
-      setSourceError('');
-      setNotesError('');
 
       navigate('/leads'); // Navigate to the leads list page
 
 
     } catch (err) {
-      console.error('Error adding lead:', err);
-      setError('Failed to add lead. Please try again.');
+      console.error('Error adding lead:', err);    setError('Failed to add lead. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -201,14 +176,10 @@ function AddLeadForm() {
    const requiredFieldsEmpty = !formData.fullName || !formData.email || !formData.status;
 
    // Check if there are any validation errors
-   const hasErrors = fullNameError || emailError || phoneError || statusError || sourceError || notesError;
+   const hasErrors = fullNameError || emailError || phoneError || statusError || notesError;
 
 
-  if (!companyId) {
-    return <div className="p-4 text-red-500">Company ID is required to add a lead.</div>;
-  }
-
-
+   if (!companyId) { return <div className="p-4 text-red-500">Company ID is required to add a lead.</div>; }
   return (
     <div className="p-4">
       {/* 
@@ -302,26 +273,6 @@ function AddLeadForm() {
           />
           {statusError && <p className="text-red-500 text-sm">{statusError}</p>}
         </div>
-
-         <div>
-          {/* 
-            Source field also stacks vertically and uses 'w-full' input.
-            Optional nature simplifies responsiveness as it doesn't add complex constraints.
-            Error message is positioned below the input.
-            The layout is responsive.
-          */}
-          <label htmlFor="source" className="block text-sm font-medium text-gray-700">Source</label>
-          <input
-            type="text"
-            id="source"
-            name="source"
-            value={formData.source}
-            onChange={handleChange}
-            className={`mt-1 block w-full rounded-md border ${sourceError ? 'border-red-500' : 'border-gray-300'} shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm`}
-          />
-          {sourceError && <p className="text-red-500 text-sm">{sourceError}</p>}
-        </div>
-
 
         <div>
           {/* 

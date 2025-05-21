@@ -1,18 +1,28 @@
-import React from 'react'; // Assuming React is necessary for JSX
-import { useNavigate } from 'react-router-dom'; // Assuming react-router-dom is used for navigation
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const SignupChoicePage = () => {
   const navigate = useNavigate();
 
   return (
-    <div>
+    <div className="signup-choice-page">
       <h1>Choose Signup Type</h1>
-      <button onClick={() => navigate('/new-company')}>
-        New Company
-      </button>
-      <button onClick={() => navigate('/login')}>
-        Existing User Login
-      </button>
+      <div className="buttons">
+        <button
+          type="button"
+          onClick={() => navigate('/new-company')}
+          className="btn btn-primary"
+        >
+          New Company Signup
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate('/signup-volunteer')}
+          className="btn btn-secondary"
+        >
+          Volunteer Signup
+        </button>
+      </div>
     </div>
   );
 };

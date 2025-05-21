@@ -100,7 +100,7 @@ function AddUserPage() {
         name: name.trim(),
         email,
         role: role.toLowerCase(), // Ensure role is stored in lowercase
-        companyId,
+        companyId: user.companyId,
         createdAt: serverTimestamp(),
       });
 

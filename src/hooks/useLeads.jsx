@@ -1,18 +1,64 @@
-// import { collection, query, orderBy } from 'firebase/firestore';
-// import { db } from '../firebase';
-// import { useauth } from '../contexts/authContext';
-// import { useCollectionData } from 'react-firebase-hooks/firestore';
-export const useLeads = () => {
-  // const leadsRef = collection(db, 'data', companyId, 'leads');
-  // const q = query(leadsRef, orderBy('createdAt', 'desc'));
-  // return useCollectionData(q, { idField: 'id' });
+import { useState, useEffect } from 'react';
+import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { db } from '../firebase/config'; // Your initialized Firestore instance
+import { useAuth } from './useAuth'; // Hook providing companyId and auth loading state
 
-  // TODO: Implement actual Firestore fetching logic here using real-time listeners
-  // This is a placeholder hook that initially returns a loading state, an empty array for leads, and no error.
-  const loading = false;
-  const leads = [];
-  const error = null;
-  return [leads, loading, error];
+/**
+ * Custom hook to fetch leads for the current company from Firestore in real-time.
+ *
+ * @returns {{ leads: Array, loading: boolean, error: Error | null }}
+ */
+export const useLeads = () => {
+  const { companyId, loading: authLoading } = useAuth();
+  const [leads, setLeads] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let unsubscribe = () => {};
+
+    const fetchLeads = () => {
+      if (!companyId) {
+        setLeads([]);
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
+      setError(null);
+
+      try {
+        const leadsRef = collection(db, 'data', companyId, 'leads');
+        const q = query(leadsRef, orderBy('createdAt', 'desc'));
+
+        unsubscribe = onSnapshot(
+          q,
+          (snapshot) => {
+            const leadsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            setLeads(leadsData);
+            setLoading(false);
+          },
+          (err) => {
+            setError(err);
+            setLoading(false);
+            console.error('Error fetching leads:', err);
+          }
+        );
+      } catch (err) {
+        setError(err);
+        setLoading(false);
+        console.error('Error setting up leads listener:', err);
+      }
+    };
+
+    if (!authLoading) {
+      fetchLeads();
+    }
+
+    return () => unsubscribe();
+  }, [companyId, authLoading]);
+
+  return { leads, loading: loading || authLoading, error };
 };
 
 export default useLeads;

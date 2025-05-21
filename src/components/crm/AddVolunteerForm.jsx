@@ -19,7 +19,6 @@ const AddVolunteerForm = () => {
     interests: [],
   });
 
-  const [validationStatus, setValidationStatus] = useState({}); // New state for validation status
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [feedback, setFeedback] = useState(null);
@@ -50,7 +49,6 @@ const AddVolunteerForm = () => {
       error = 'Invalid email format.';
     }
     setErrors(prev => ({ ...prev, [name]: error }));
-    setValidationStatus(prev => ({ ...prev, [name]: error ? 'invalid' : 'valid' }));
   };
 
   const validateForm = () => {
@@ -106,20 +104,6 @@ const AddVolunteerForm = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleReset = () => {
-    setVolunteer({
-      name: '',
-      email: '',
-      phone: '',
-      location: '',
-      availability: [],
-      interests: [],
-    });
-    setErrors({});
-    setValidationStatus({});
-    setFeedback(null);
   };
 
   return (

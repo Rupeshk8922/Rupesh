@@ -1,7 +1,7 @@
-import { useState } from 'react'; // useCompanyLogin.js
+import { useState } from 'react';
 import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../firebase/config'; // Ensure db is imported
+import { db } from '../firebase/config';
 
 export const useCompanyLogin = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -9,65 +9,78 @@ export const useCompanyLogin = () => {
   const [subscriptionStatus, setSubscriptionStatus] = useState(null);
   const [role, setRole] = useState(null);
 
+  if (!db) {
+    console.error("Firebase Firestore DB is not initialized!");
+    throw new Error("Firebase Firestore DB is not initialized!");
+  }
+
   const validateForm = (email, password) => {
-    if (!email || !password) {
-      setError('Both fields are required');
-      return false;
-    }
-    return true;
+    return email && password;
   };
 
   const handleCompanyLogin = async (email, password) => {
+    console.log('handleCompanyLogin called with email:', email);
     setError(null);
     setSubscriptionStatus(null);
     setRole(null);
 
-    const isValid = validateForm(email, password);
+    if (!validateForm(email, password)) {
+      const validationMessage = 'Both fields are required';
+      setError(validationMessage);
+      throw new Error(validationMessage);
+    }
 
-    if (isValid) {
-      setIsLoading(true);
-      try {
-        const auth = getAuth();
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
+    setIsLoading(true);
+    try {
+      const auth = getAuth();
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      console.log('Firebase login successful. User:', user);
 
-        const userDocRef = doc(db, 'users', user.uid);
-        const userDocSnap = await getDoc(userDocRef);
+      const userDocRef = doc(db, 'users', user.uid);
+      const userDocSnap = await getDoc(userDocRef);
 
-        if (userDocSnap.exists()) {
-          const userData = userDocSnap.data();
-          setSubscriptionStatus(userData.subscriptionType);
-          setRole(userData.role);
-        }
+      if (userDocSnap.exists()) {
+        const userData = userDocSnap.data();
+        if (!userData) throw new Error('User data is undefined after fetching');
 
-        const idToken = await user.getIdToken();
-
-        try {
-          const response = await fetch('https://verifycompanyloginv2-7fciy242nq-uc.a.run.app/verifyCompanyLoginV2', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${idToken}`,
-            },
-            body: JSON.stringify({}),
-          });
-
-          const data = await response.json();
-          if (!response.ok) {
-            setError(data.error || data.message || 'Company login verification failed');
-          }
-        } catch (fetchError) {
-          console.error("Error during serverless function call:", fetchError);
-          setError('An error occurred during company verification.');
-        }
-      } catch (loginError) {
-        console.log("Attempted login email:", email);
-        console.log("Firebase login error object:", loginError);
-        console.error("Login error:", loginError);
-        setError('Login failed. Please check your credentials.');
-      } finally {
-        setIsLoading(false);
+        console.log('Fetched user data:', userData);
+        setSubscriptionStatus(userData.subscriptionType);
+        setRole(userData.role);
+      } else {
+        throw new Error('User document not found in Firestore');
       }
+
+      const idToken = await user.getIdToken();
+
+      const response = await fetch(
+        'https://us-central1-empact-yhwq3.cloudfunctions.net/api/verifyCompanyLoginV2',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${idToken}`,
+          },
+          body: JSON.stringify({}),
+        }
+      );
+
+      const data = await response.json();
+      if (!response.ok) {
+        const errMsg = data.error || data.message || 'Company login verification failed';
+        setError(errMsg);
+        throw new Error(errMsg);
+      }
+
+      console.log('Company verification passed.');
+    } catch (loginError) {
+      console.error("Login error:", loginError);
+      if (!error) {
+        setError('Login failed. Please check your credentials.');
+      }
+      throw loginError;
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -77,6 +90,7 @@ export const useCompanyLogin = () => {
     try {
       const auth = getAuth();
       await sendPasswordResetEmail(auth, email);
+      console.log("Password reset email sent.");
     } catch (err) {
       console.error("Error sending password reset email:", err);
       setError('Failed to send password reset email. Please check the email address.');
@@ -86,8 +100,8 @@ export const useCompanyLogin = () => {
   };
 
   return {
-    error,
     isLoading,
+    error,
     login: handleCompanyLogin,
     sendPasswordReset,
     subscriptionStatus,

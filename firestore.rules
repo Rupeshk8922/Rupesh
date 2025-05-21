@@ -1,9 +1,14 @@
-firestore
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // Allow authenticated users to read their own user document
     // Users can read their own profile
+    match /users/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      // Add other rules for create, update, delete as needed for user documents
+    }
+
     match /users/{userId} {
       allow read: if request.auth != null && request.auth.uid == userId; // Corrected to allow only own profile read
       allow create: if request.auth != null && request.auth.uid == userId; // Allow authenticated users to create their own document
@@ -37,5 +42,24 @@ service cloud.firestore {
  request.auth.token.companyId == resource.data.companyId &&
  request.auth.token.role in ['admin', 'outreach', 'volunteer'];
     }
+
+    // Allow access to volunteer hours
+    match /volunteer_hours/{hourId} {
+      allow create: if request.auth != null &&
+                  request.auth.uid == request.resource.data.volunteerId;
+      allow read: if request.auth != null && (
+                  request.auth.uid == resource.data.volunteerId ||
+                  (request.auth.token.role == "admin" &&
+                   request.auth.token.companyId == get(/databases/$(database)/documents/users/$(resource.data.volunteerId)).data.companyId)); // Requires fetching volunteer's companyId
+      allow update: if request.auth != null &&
+                    request.auth.token.role == "admin" &&
+                    request.auth.token.companyId == get(/databases/$(database)/documents/users/$(resource.data.volunteerId)).data.companyId && // Requires fetching volunteer's companyId
+                    !("volunteerId" in request.resource.data) &&
+                    !("eventId" in request.resource.data);
+    }
+
+    // Keep your existing rules for other collections below this
+    // match /your_collection/{documentId} {
+    //   // ... your rules for this collection
   }
 }

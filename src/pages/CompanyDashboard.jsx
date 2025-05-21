@@ -1,23 +1,48 @@
-// src/pages/CompanyDashboard.jsx
-import React from 'react';
-import { useFetchCompanyData } from '../hooks/useFetchCompanyData.jsx';
-import { useAuth } from '../hooks/useAuth'; // Import useAuth hook
-import { useCompanyUsers } from '../hooks/useCompanyUsers';
-import DashboardLayout from '../components/DashboardLayout'; // Import DashboardLayout
+import { useEffect, useState } from 'react';
+import { useAuth } from '../hooks/useAuth';import CompanyDataReader from '../components/CompanyDataReader';
 
-function CompanyDashboard() {
-  const { companyData, isLoading: isLoadingCompanyData, error: errorCompanyData } = useFetchCompanyData();
-  const companyId = companyData?.id || localStorage.getItem('companyId'); // Assuming you have these hooks, uncomment and use if needed.
-  const { user, role, loading, error } = useAuth(); // Get user, role, loading, and error from useAuth hook.
-console.log(user, role, loading, error)
+function CompanyDashboard() { // Removed `companyId` prop - fetching within component
+  console.log("🏠 CompanyDashboard: Rendering...");
+  const { user, authLoading, claims } = useAuth();
+  const [companyId, setCompanyId] = useState(null);
+  const [claimsLoaded, setClaimsLoaded] = useState(false); // ✅ New flag
+
+  useEffect(() => {
+    console.log("🏠 CompanyDashboard: user, authLoading, claims changed:", {
+      user: user?.uid || null,
+      authLoading,
+      claims,
+    });
+
+    // ✅ Ensure claims exist before processing
+    if (claims && claims.companyId) {
+      setCompanyId(claims.companyId);
+      setClaimsLoaded(true);
+      console.log("🏠 CompanyDashboard: companyId set to:", claims.companyId);
+    } else {
+      setCompanyId(null);
+      setClaimsLoaded(false);
+      console.log("🏠 CompanyDashboard: No companyId found in claims.");
+    }
+  }, [user, authLoading, claims]);
+
+  // 🟡 Use CompanyDataReader's loading state or a separate fetch in this component
+  if (authLoading || !claimsLoaded) {
+    return <div>Loading dashboard...</div>;
+  }
+
+  if (!user) return <div>Please log in.</div>;
+
+  // 🟡 Conditionally render based on companyId availability
   return (
-    <>
-      {loading && <p>Loading dashboard...</p>}
-      {error && <p>Error loading authentication data: {error.message}</p>}
-      {user && role && !loading && !error && (
-        <DashboardLayout role={role} />
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-4">Company Dashboard</h1>
+      {companyId ? (
+        <CompanyDataReader companyId={companyId} />
+      ) : (
+        <div>Company ID not found in claims.</div>
       )}
-    </>
+    </div>
   );
 }
 

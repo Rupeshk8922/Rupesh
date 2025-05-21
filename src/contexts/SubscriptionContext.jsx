@@ -3,7 +3,7 @@ import { createContext, useContext, useState, useEffect } from 'react';
 const SubscriptionContext = createContext();
 
 export const SubscriptionProvider = ({ children }) => {
-  const [subscription, setSubscription] = useState(null);
+  const [subscription] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // You'll likely want to add logic here to fetch the user's subscription
@@ -12,7 +12,7 @@ export const SubscriptionProvider = ({ children }) => {
   useEffect(() => {
     // Example: Fetch subscription data from your backend or Firebase
     const fetchSubscription = async () => {
-      try { // eslint-disable-next-line no-unused-vars
+      try {  
         // Replace with your actual fetching logic
         // const response = await fetch('/api/subscription');
         // const data = await response.json();

@@ -1,56 +1,39 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { doc, getDoc, updateDoc, collection, query, getDocs } from 'firebase/firestore'; // Import collection, query, getDocs
-import { db } from '../firebase/config'; // Firestore config
-import { useAuth } from '../contexts/authContext'; // Custom Auth Context - Normalized import
+import { doc, getDoc, updateDoc, collection, query, getDocs } from 'firebase/firestore';
+import { db } from '../firebase/config';
+import { useAuth } from '../hooks/useAuth';
 
-  const { volunteerId } = useParams(); // Get volunteerId from URL
-  const navigate = useNavigate();
 
-  // State for form data
+
+function EditVolunteerPage() {
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
-    availability: [], // Initialize as array for multiselect
-    interests: [],    // Initialize as array for multiselect
-    location: '',
-    joinedAt: null, // Firestore Timestamp
-    status: 'Active', // Default status
-    assignedEvents: [] // Array of event IDs assigned to this volunteer
+    availability: [],
+    interests: [],
+    location: '', 
+    // Assuming joinedAt is not editable, fetch and display it or remove from form
+    // joinedAt: null,
+    status: 'Active',
+    assignedEvents: []
   });
-
-  // Loading and Error states for initial data fetch
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  // State for available events to assign
   const [availableEvents, setAvailableEvents] = useState([]);
   const [eventsLoading, setEventsLoading] = useState(true);
   const [eventsError, setEventsError] = useState(null);
-
-  // Loading and Error states for save operation
   const [saveLoading, setSaveLoading] = useState(false);
   const [saveError, setSaveError] = useState(null);
 
-  // Validation error states
-  const [nameError, setNameError] = useState('');
-  const [emailError, setEmailError] = useState('');
-  const [phoneError, setPhoneError] = useState('');
-  const [availabilityError, setAvailabilityError] = useState(''); // For multiselect validation
-  const [interestsError, setInterestsError] = useState('');    // For multiselect validation
-  const [locationError, setLocationError] = useState('');
-  const [statusError, setStatusError] = useState('');
-  const [assignedEventsError, setAssignedEventsError] = useState(''); // Validation for assigned events
+  const { volunteerId } = useParams();
+  const { user, companyId, loading: authLoading, userRole } = useAuth();
+  const navigate = useNavigate(); // Now used for navigation
 
-function EditVolunteerPage() {
-  const { volunteerId } = useParams(); // Get volunteerId from URL
-  const { companyId, userRole } = useAuth(); // Auth context - Corrected import and usage
-  const navigate = useNavigate();
 
-  // Fetch volunteer data on component mount or ID change
-  useEffect(() => {
-    const fetchVolunteerData = async () => {
+  const fetchVolunteerData = async () => {
       if (!companyId || !volunteerId) {
         setError('Company ID or Volunteer ID is missing.');
         setLoading(false);
@@ -70,7 +53,8 @@ function EditVolunteerPage() {
             availability: volunteerData.availability || [],
             interests: volunteerData.interests || [],
             location: volunteerData.location || '',
-            joinedAt: volunteerData.joinedAt || null,
+            // If joinedAt is not editable, you might not need it in formData, or display it separately 
+            // joinedAt: volunteerData.joinedAt || null, 
             status: volunteerData.status || 'Active',
             assignedEvents: volunteerData.assignedEvents || []
           });
@@ -84,26 +68,21 @@ function EditVolunteerPage() {
         setLoading(false);
       }
     };
-
-    fetchVolunteerData();
-  }, [companyId, volunteerId]);
-
-  // Fetch list of available events
-  useEffect(() => {
-    const fetchEvents = async () => {
-      if (!companyId) {
-        setEventsError('Company ID is missing for fetching events.');
-        setEventsLoading(false);
-        return;
-      }
-      try {
-        const eventsCollectionRef = collection(db, 'data', companyId, 'events');
-        const q = query(eventsCollectionRef);
-        const querySnapshot = await getDocs(q);
-        const eventsList = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          title: doc.data().title || 'Unnamed Event', // Fetch event title for display
-        }));
+  
+  const fetchEvents = async () => {
+    if (!companyId) {
+      setEventsError('Company ID is missing for fetching events.');
+      setEventsLoading(false);
+      return;
+    }
+    try {
+      const eventsCollectionRef = collection(db, 'data', companyId, 'events');
+      const q = query(eventsCollectionRef);
+      const querySnapshot = await getDocs(q);
+      const eventsList = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        title: doc.data().title || 'Unnamed Event', // Fetch event title for display
+      }));
         setAvailableEvents(eventsList);
       } catch (err) {
         console.error('Error fetching events:', err);
@@ -111,15 +90,34 @@ function EditVolunteerPage() {
       } finally {
         setEventsLoading(false);
       }
-    };
-    fetchEvents();
-  }, [companyId]);
+  };
+  
+  useEffect(() => { // Include volunteerId and fetch functions in deps
+    fetchVolunteerData(); // This dependency is problematic, as it's a function inside a useEffect
+    fetchEvents(); // This dependency is problematic, as it's a function inside a useEffect
+  }, [companyId, volunteerId]); // Include volunteerId and fetch functions in deps
+  
+  const [nameError, setNameError] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [phoneError, setPhoneError] = useState('');
+  const [availabilityError, setAvailabilityError] = useState('');
+  const [interestsError, setInterestsError] = useState('');
+  const [locationError, setLocationError] = useState('');
+  const [statusError, setStatusError] = useState('');
+  const [assignedEventsError, setAssignedEventsError] = useState('');
 
   // Basic role check (adjust as needed for your application's roles)
-  if (userRole !== 'admin' && userRole !== 'Manager' && userRole !== 'Outreach Officer') {
-    return <div style={{ padding: '2rem', color: 'red' }}>You do not have permission to edit volunteers.</div>;
+  // Wait for auth to load before checking roles or rendering anything 
+  if (authLoading) { 
+ return <div className="p-4 text-center text-gray-600">Loading authentication...</div>;
   }
 
+  if (!user) { // Redirect if not authenticated after loading 
+ return <navigate to="/login" />;
+  }
+ if (userRole !== 'admin' && userRole !== 'Manager' && userRole !== 'Outreach Officer') {
+    return <div style={{ padding: '2rem', color: 'red' }}>You do not have permission to edit volunteers.</div>;
+  }
   // --- Validation Functions ---
   const validateName = (name) => {
     if (!name.trim()) return 'Full Name is required';
@@ -211,9 +209,6 @@ function EditVolunteerPage() {
     // Validate the multiselect field
     const errorMsg = validateField(name, selectedValues);
     if (name === 'availability') setAvailabilityError(errorMsg);
-    else if (name === 'interests') setInterestsError(errorMsg);
-
-    // TODO: Trigger Volunteer Engagement Reminder or other relevant email if Availability changes
     triggerEmailNotification('volunteerAvailabilityUpdate', { volunteerData: { ...formData, [name]: selectedValues } });
   };
 
@@ -278,7 +273,8 @@ function EditVolunteerPage() {
         availability: formData.availability,
         interests: formData.interests,
         location: formData.location,
-        status: formData.status,
+        // Ensure status is not empty before saving
+        status: formData.status || 'Active', 
         assignedEvents: formData.assignedEvents,
       };
       await updateDoc(volunteerDocRef, dataToUpdate);
@@ -302,13 +298,13 @@ function EditVolunteerPage() {
   const overallLoading = loading || eventsLoading;
   const overallError = error || eventsError;
 
-  if (overallLoading) return <div className="p-4 text-center text-gray-600">Loading data...</div>;
+  if (overallLoading) return <div className="p-4 text-center text-gray-600">Loading volunteer data...</div>;
   if (overallError) return <div className="p-4 text-center text-red-600">Error: {overallError}</div>;
 
   return (
     <div className="p-4 max-w-2xl mx-auto bg-white shadow-md rounded-lg my-8">
       <h2 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-4">Edit Volunteer</h2>
-      <form className="space-y-6" onSubmit={handleSubmit}>
+      <form className="space-y-6" onSubmit={(e) => handleSubmit(e)}>
         <div>
           <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">Full Name</label>
           <input

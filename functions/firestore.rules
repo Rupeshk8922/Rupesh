@@ -1,16 +1,15 @@
-rules_version = '2';
+rules_version = '2'; // This should be the very first line
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // Rule 1: Allow users to read/write only their own user document
-    match /companies/{companyId}/users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+    // Allow authenticated users to read their own user document
+    match /users/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      // Add other rules for create, update, delete as needed for user documents
     }
 
-    // Rule 2: Allow only users within the same company to read donor documents
-    match /companies/{companyId} {
-      allow read: if request.auth != null &&
-        get(/databases/$(database)/documents/companies/$(companyId)/users/$(request.auth.uid)).exists();
-    }
+    // Keep your existing rules for other collections below this
+    // match /your_collection/{documentId} {
+    //   // ... your rules for this collection
+    // }
   }
 }

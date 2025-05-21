@@ -1,16 +1,3 @@
-import React from 'react';
-
-// Define user roles
-const ROLES = {
-  ADMIN: 'admin',
-  ORGANIZER: 'organizer',
-  VOLUNTEER: 'volunteer',
-};
-
-// Simulate the current user's role.
-// In a real application, this would come from your authentication context or state.
-const currentUserRole = ROLES.ADMIN; // Change this value to test different roles
-
 const Navigation = () => {
 
   return (

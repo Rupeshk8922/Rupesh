@@ -1,9 +1,7 @@
 import React from 'react';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import PerformanceSummary from '../src/pages/PerformanceSummary';
-import { authContext } from '../src/contexts/authContext';
-import { FirebaseContext } from '../src/contexts/FirebaseContext';
+import { FirebaseContext, AuthContext } from '../src/contexts/FirebaseContext';
 import { act } from 'react-dom/test-utils';
 
 // Mock Firebase and Auth functionalities

@@ -1,8 +1,7 @@
-import React from 'react';
 import { useState } from 'react';
 import { collection, addDoc } from 'firebase/firestore';
+import { useAuth } from '../../hooks/useAuth';
 import { db } from '../../firebase/config'; // Adjust path as needed
-import { useAuth } from '../../contexts/authContext'; // Adjust path as needed
 
 function AddEventForm() {
   const [formData, setFormData] = useState({
@@ -69,29 +68,15 @@ function AddEventForm() {
     if (description && description.length > 300) return 'Description must be under 300 characters.';
     return '';
   };
-  const { companyId } = useAuth(); // Get companyId from Auth context
-
-  const validateForm = () => {
-    const nameValid = validateName(formData.name) === '';
-    const eventTypeValid = validateEventType(formData.eventType) === '';
-    const dateValid = validateDate(formData.date) === '';
-    const locationValid = validateLocation(formData.location) === '';
-    const volunteerCapacityValid = validateVolunteerCapacity(formData.volunteerCapacity) === ''; // Optional field validation
-    const descriptionValid = validateDescription(formData.description) === ''; // Description validation
-
-    return nameValid && eventTypeValid && dateValid && locationValid && volunteerCapacityValid && descriptionValid;
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Perform validation on submit to set errors if any
     const nameErr = validateName(formData.name);
-    const eventTypeErr = validateEventType(formData.eventType);
+    const eventTypeErr = validateEventType(formData.eventType)
     const dateErr = validateDate(formData.date);
     const locationErr = validateLocation(formData.location);
-    const volunteerCapacityErr = validateVolunteerCapacity(formData.volunteerCapacity);
-    const descriptionErr = validateDescription(formData.description);
+    const volunteerCapacityErr = validateVolunteerCapacity(formData.volunteerCapacity)
 
     setNameError(nameErr);
     setEventTypeError(eventTypeErr);
@@ -105,6 +90,7 @@ function AddEventForm() {
       return;
     }
 
+    const { companyId } = useAuth(); // Get companyId from Auth context
     setIsLoading(true);
     setEventCreationStatus(null); // Reset status on new submission
 

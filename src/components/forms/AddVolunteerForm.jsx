@@ -1,6 +1,4 @@
 import { useState } from 'react';
-import { collection, addDoc } from 'firebase/firestore';
-import { db } from '../../firebase/config';
 import { useAuth } from '../../contexts/authContext';
 import { useVolunteers } from '../../hooks/useVolunteers';
 
@@ -35,14 +33,10 @@ function AddVolunteerForm() {
   const { addVolunteer } = useVolunteers();
 
   if (!companyId) {
-    return (
-      <div style={{ padding: '2rem', color: 'red' }}>
-        Company ID is missing. Cannot add volunteer.
-      </div>
-    );
+    return <div className="p-4 text-red-600">Company ID is missing. Cannot add volunteer.</div>;
   }
 
-  // Validation functions here (unchanged)
+  // -------------------- Validation Functions --------------------
   const validateFullName = (name) => {
     if (!name.trim()) return 'Full Name is required';
     if (name.trim().length < 3) return 'Full Name must be at least 3 characters';
@@ -61,38 +55,18 @@ function AddVolunteerForm() {
     return '';
   };
 
-  const validateSkillsInterests = (skills) => {
-    if (skills.length > 500) return 'Skills/Interests cannot exceed 500 characters';
-    return '';
-  };
-
-  const validateAvailability = (availability) => {
-    if (availability.length > 500) return 'Availability cannot exceed 500 characters';
-    return '';
-  };
-
-  const validateLocation = (location) => {
-    if (location && location.trim().length < 2) return 'Location/City must be at least 2 characters';
-    return '';
-  };
-
-  const validatePreferredCauses = (causes) => {
-    if (causes.length > 500) return 'Preferred Causes cannot exceed 500 characters';
-    return '';
-  };
-
+  const validateSkillsInterests = (skills) => (skills.length > 500 ? 'Skills/Interests cannot exceed 500 characters' : '');
+  const validateAvailability = (availability) => (availability.length > 500 ? 'Availability cannot exceed 500 characters' : '');
+  const validateLocation = (location) => (location && location.trim().length < 2 ? 'Location/City must be at least 2 characters' : '');
+  const validatePreferredCauses = (causes) => (causes.length > 500 ? 'Preferred Causes cannot exceed 500 characters' : '');
   const validateStatus = (status) => {
     if (!status) return 'Status is required';
     const validStatuses = ['Active', 'Inactive', 'On Leave'];
-    if (!validStatuses.includes(status)) return 'Invalid Status selected';
-    return '';
+    return validStatuses.includes(status) ? '' : 'Invalid Status selected';
   };
+  const validateNotes = (notes) => (notes.length > 500 ? 'Notes cannot exceed 500 characters' : '');
 
-  const validateNotes = (notes) => {
-    if (notes.length > 500) return 'Notes cannot exceed 500 characters';
-    return '';
-  };
-
+  // -------------------- Submit Handler --------------------
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -111,9 +85,7 @@ function AddVolunteerForm() {
       notesError: validateNotes(formData.notes),
     };
 
-    const filteredErrors = Object.fromEntries(
-      Object.entries(newErrors).filter(([_, value]) => value !== '')
-    );
+    const filteredErrors = Object.fromEntries(Object.entries(newErrors).filter(([, value]) => value !== ''));
 
     if (Object.keys(filteredErrors).length > 0) {
       setFullNameError(filteredErrors.fullNameError || '');
@@ -129,7 +101,7 @@ function AddVolunteerForm() {
       return;
     }
 
-    setLoading(true); // Set loading state to true
+    setLoading(true);
     try {
       await addVolunteer(companyId, {
         ...formData,
@@ -137,21 +109,18 @@ function AddVolunteerForm() {
       });
 
       setSuccessMessage('Volunteer added successfully!');
-
-      // Reset form and errors
-      setFormData({ // Corrected reset
- fullName: '',
+      setFormData({
+        fullName: '',
         email: '',
- phone: '',
+        phone: '',
         skillsInterests: '',
- availability: '',
+        availability: '',
         location: '',
         preferredCauses: '',
- status: '',
- notes: '',
+        status: '',
+        notes: '',
       });
 
-      // Clear errors on success
       setFullNameError('');
       setEmailError('');
       setPhoneError('');
@@ -160,20 +129,21 @@ function AddVolunteerForm() {
       setLocationError('');
       setPreferredCausesError('');
       setStatusError('');
-      setNotesError(''); // Corrected clear
+      setNotesError('');
     } catch (err) {
-      console.error('Error adding volunteer:', err); // Log the specific error
+      console.error('Error adding volunteer:', err);
       setError('Failed to add volunteer.');
     } finally {
       setLoading(false);
     }
   };
 
+  // -------------------- Field Change Handler --------------------
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
-    // Validate on change
+    // Live validation
     switch (name) {
       case 'fullName':
         setFullNameError(validateFullName(value));
@@ -207,6 +177,7 @@ function AddVolunteerForm() {
     }
   };
 
+  // -------------------- JSX --------------------
   return (
     <div className="p-4 max-w-lg mx-auto">
       <h2 className="text-xl font-bold mb-4">Add New Volunteer</h2>
@@ -214,10 +185,9 @@ function AddVolunteerForm() {
       {successMessage && <p className="text-green-600 mb-4">{successMessage}</p>}
 
       <form className="space-y-4" onSubmit={handleSubmit}>
+        {/* Full Name */}
         <div>
-          <label htmlFor="fullName" className="block font-medium">
-            Full Name
-          </label>
+          <label htmlFor="fullName" className="block font-medium">Full Name</label>
           <input
             type="text"
             id="fullName"
@@ -229,10 +199,9 @@ function AddVolunteerForm() {
           {fullNameError && <p className="text-red-500 text-sm">{fullNameError}</p>}
         </div>
 
+        {/* Email */}
         <div>
-          <label htmlFor="email" className="block font-medium">
-            Email
-          </label>
+          <label htmlFor="email" className="block font-medium">Email</label>
           <input
             type="email"
             id="email"
@@ -244,10 +213,9 @@ function AddVolunteerForm() {
           {emailError && <p className="text-red-500 text-sm">{emailError}</p>}
         </div>
 
+        {/* Phone */}
         <div>
-          <label htmlFor="phone" className="block font-medium">
-            Phone Number
-          </label>
+          <label htmlFor="phone" className="block font-medium">Phone Number</label>
           <input
             type="tel"
             id="phone"
@@ -259,10 +227,9 @@ function AddVolunteerForm() {
           {phoneError && <p className="text-red-500 text-sm">{phoneError}</p>}
         </div>
 
+        {/* Skills/Interests */}
         <div>
-          <label htmlFor="skillsInterests" className="block font-medium">
-            Skills/Interests
-          </label>
+          <label htmlFor="skillsInterests" className="block font-medium">Skills/Interests</label>
           <textarea
             id="skillsInterests"
             name="skillsInterests"
@@ -273,10 +240,9 @@ function AddVolunteerForm() {
           {skillsInterestsError && <p className="text-red-500 text-sm">{skillsInterestsError}</p>}
         </div>
 
+        {/* Availability */}
         <div>
-          <label htmlFor="availability" className="block font-medium">
-            Availability
-          </label>
+          <label htmlFor="availability" className="block font-medium">Availability</label>
           <textarea
             id="availability"
             name="availability"
@@ -287,10 +253,9 @@ function AddVolunteerForm() {
           {availabilityError && <p className="text-red-500 text-sm">{availabilityError}</p>}
         </div>
 
+        {/* Location */}
         <div>
-          <label htmlFor="location" className="block font-medium">
-            Location/City
-          </label>
+          <label htmlFor="location" className="block font-medium">Location/City</label>
           <input
             type="text"
             id="location"
@@ -302,10 +267,9 @@ function AddVolunteerForm() {
           {locationError && <p className="text-red-500 text-sm">{locationError}</p>}
         </div>
 
+        {/* Preferred Causes */}
         <div>
-          <label htmlFor="preferredCauses" className="block font-medium">
-            Preferred Causes
-          </label>
+          <label htmlFor="preferredCauses" className="block font-medium">Preferred Causes</label>
           <textarea
             id="preferredCauses"
             name="preferredCauses"
@@ -316,10 +280,9 @@ function AddVolunteerForm() {
           {preferredCausesError && <p className="text-red-500 text-sm">{preferredCausesError}</p>}
         </div>
 
+        {/* Status */}
         <div>
-          <label htmlFor="status" className="block font-medium">
-            Status
-          </label>
+          <label htmlFor="status" className="block font-medium">Status</label>
           <select
             id="status"
             name="status"
@@ -335,10 +298,9 @@ function AddVolunteerForm() {
           {statusError && <p className="text-red-500 text-sm">{statusError}</p>}
         </div>
 
+        {/* Notes */}
         <div>
-          <label htmlFor="notes" className="block font-medium">
-            Notes
-          </label>
+          <label htmlFor="notes" className="block font-medium">Notes</label>
           <textarea
             id="notes"
             name="notes"
@@ -349,6 +311,7 @@ function AddVolunteerForm() {
           {notesError && <p className="text-red-500 text-sm">{notesError}</p>}
         </div>
 
+        {/* Submit Button */}
         <div>
           <button
             type="submit"
@@ -367,7 +330,7 @@ function AddVolunteerForm() {
               !formData.email ||
               !formData.status
             }
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
           >
             {loading ? 'Adding...' : 'Add Volunteer'}
           </button>

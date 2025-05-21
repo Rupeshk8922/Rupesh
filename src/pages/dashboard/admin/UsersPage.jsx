@@ -1,20 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { collection, getDocs, doc, deleteDoc } from 'firebase/firestore';
-import { db } from '../../../firebase/config'; // Adjust the path as needed
-import { useAuth } from '../../../contexts/authContext.jsx';
+import { db } from '../../../firebase/config'; // Adjust as needed
+import { useAuth } from '../../../hooks/useAuth'; // Adjust this path too
 
 function UsersPage({ companyId }) {
+  const { user } = useAuth();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { user } = useAuth();
 
+  // Fetch users from Firestore
   const fetchUsers = async () => {
     if (!companyId) {
       setError('Company ID is not available.');
       setLoading(false);
       return;
     }
+
     try {
       setLoading(true);
       const usersCollectionRef = collection(db, 'users');
@@ -31,16 +33,20 @@ function UsersPage({ companyId }) {
     }
   };
 
+  // Load users on mount or when companyId/user changes
   useEffect(() => {
-    fetchUsers();
+    if (user && companyId) {
+      fetchUsers();
+    }
   }, [user, companyId]);
 
+  // Handle user deletion
   const handleDelete = async (userId) => {
     if (window.confirm('Are you sure you want to delete this user?')) {
       try {
         const userDocRef = doc(db, 'users', userId);
         await deleteDoc(userDocRef);
-        setUsers(users.filter(user => user.id !== userId));
+        setUsers(prevUsers => prevUsers.filter(user => user.id !== userId));
       } catch (err) {
         console.error('Error deleting user:', err);
         setError('Failed to delete user.');
@@ -48,6 +54,7 @@ function UsersPage({ companyId }) {
     }
   };
 
+  // UI States
   if (loading) {
     return <div className="p-4">Loading users...</div>;
   }
@@ -76,7 +83,7 @@ function UsersPage({ companyId }) {
               <tr key={user.id}>
                 <td className="px-6 py-4 whitespace-nowrap">{user.name}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{user.email}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{user.role}</td>
+                <td className="px-6 py-4 whitespace-nowrap capitalize">{user.role}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <button
                     onClick={() => handleDelete(user.id)}

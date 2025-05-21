@@ -9,7 +9,7 @@ export const useFetchSubscriptionStatus = (companyId) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
+ useEffect(() => {
     if (!companyId) {
       setSubscription(null);
       setLoading(false);

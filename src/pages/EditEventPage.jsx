@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { collection, query, onSnapshot, doc, getDoc, updateDoc } from 'firebase/firestore';
-import { db } from '../firebase/config'; // Firestore config
+import { db } from '../firebase'; // Firestore config
 import { useAuth } from '../contexts/authContext.jsx';
 
 function EditEventPage() { // Review for mobile responsiveness, especially form layout.
@@ -27,11 +27,15 @@ function EditEventPage() { // Review for mobile responsiveness, especially form 
   const [previousAssignedVolunteers, setPreviousAssignedVolunteers] = useState([]);
 
   const [loading, setLoading] = useState(true);
+  const [initialFetchError, setInitialFetchError] = useState(null); // For errors during initial data load
   const [error, setError] = useState(null);
   const [saveLoading, setSaveLoading] = useState(false);
   const [feedbackMessage, setFeedbackMessage] = useState(null); // Success or failure message for the user
   const [saveError, setSaveError] = useState(null);
-  const [volunteersLoading, setVolunteersLoading] = useState(true);
+
+  // Separate loading and error for volunteers to allow concurrent fetching or display partial data
+  const [volunteersLoading, setVolunteersLoading] = useState(false);
+  const [volunteersError, setVolunteersError] = useState(null);
   const [allVolunteers, setAllVolunteers] = useState([]);
   const [errors, setErrors] = useState({});
 
@@ -42,15 +46,20 @@ function EditEventPage() { // Review for mobile responsiveness, especially form 
   };
 
   useEffect(() => {
-    const fetchEventData = async () => {
-      if (!user?.companyId || !eventId) {
-        setError('Company ID or Event ID is missing.');
-        setLoading(false);
-        return;
+    if (!user || !companyId) {
+      // Wait for auth context to load user and companyId
+      if (!loading) { // Only set error if useAuth is not loading anymore
+         setInitialFetchError('User or Company ID not available.');
+         setLoading(false);
       }
+      return;
+    }
 
+    const fetchEventData = async () => {
+      setLoading(true);
+
+      // Using companyId from context directly
       try {
-        const eventDocRef = doc(db, 'data', companyId, 'events', eventId);
         const eventDocSnap = await getDoc(doc(db, 'data', user.companyId, 'events', eventId));
 
         if (eventDocSnap.exists()) {
@@ -75,16 +84,17 @@ function EditEventPage() { // Review for mobile responsiveness, especially form 
           setPreviousAssignedVolunteers(eventData.assignedVolunteers || []);
         } else {
           setError('Event not found.');
+          setInitialFetchError('Event not found.'); // Use initial fetch error state
         }
       } catch (err) {
         console.error('Error fetching event data:', err);
         setError('Failed to fetch event data.');
+        setInitialFetchError('Failed to fetch event data.'); // Use initial fetch error state
       } finally {
         setLoading(false);
       }
     };
 
-    const fetchAllVolunteers = () => {
       if (!user?.companyId) return;
 
       setVolunteersLoading(true);
@@ -92,6 +102,7 @@ function EditEventPage() { // Review for mobile responsiveness, especially form 
       const q = query(volunteersRef);
 
       const unsubscribe = onSnapshot(
+        // Corrected query path
         q,
         (snapshot) => {
           const volunteersData = snapshot.docs.map((doc) => ({
@@ -103,19 +114,22 @@ function EditEventPage() { // Review for mobile responsiveness, especially form 
           setVolunteersLoading(false);
         },
         (err) => {
+          // Use a separate error state for volunteers
           console.error('Error fetching all volunteers:', err);
+          setVolunteersError('Failed to load volunteers.');
           setVolunteersLoading(false);
         }
       );
-      return unsubscribe;
-    };
 
     fetchEventData();
-    const unsubscribeVolunteers = fetchAllVolunteers();
 
+    // Call fetchEventData and setup the volunteer listener
+    // fetchEventData(); // This line seems redundant, calling it twice
     // Cleanup volunteer listener on unmount
     return () => {
-      if (unsubscribeVolunteers) unsubscribeVolunteers();
+      if (unsubscribe) {
+ unsubscribe();
+      }
     };
   }, [user?.companyId, eventId]);
 
@@ -257,8 +271,14 @@ function EditEventPage() { // Review for mobile responsiveness, especially form 
     }
   };
 
-  if (loading) return <div>Loading event data...</div>;
-  if (error) return <div style={{ color: 'red' }}>Error: {error}</div>;
+  // Render loading state for the main event data fetch
+  if (loading) {
+    return <div>Loading event data...</div>;
+  }
+  // Render error state for the initial event data fetch
+  if (initialFetchError) {
+    return <div style={{ color: 'red' }}>Error: {initialFetchError}</div>;
+  }
 
   const displayError = saveError || error;
 
@@ -420,6 +440,9 @@ function EditEventPage() { // Review for mobile responsiveness, especially form 
           )}
           <small>Hold Ctrl (Cmd on Mac) to select multiple volunteers.</small>
         </div>
+        {/* Display volunteer loading/error states */}
+        {volunteersLoading && <p>Loading volunteers...</p>}
+        {volunteersError && <p style={{ color: 'red' }}>Error loading volunteers: {volunteersError}</p>}
 
         {/* Description */}
         <div className="form-group" style={{ marginBottom: '1rem' }}>

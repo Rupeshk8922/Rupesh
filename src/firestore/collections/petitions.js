@@ -1,4 +1,4 @@
-import { collection, Timestamp } from 'firebase/firestore';
+import { Timestamp } from 'firebase/firestore';
 
 const petitionsCollection = {
   title: {

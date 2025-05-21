@@ -1,5 +1,4 @@
-jsx
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   collection,
@@ -19,7 +18,7 @@ const TrackHoursPage = () => {
   const [volunteer, setVolunteer] = useState(null);
   const [loadingVolunteer, setLoadingVolunteer] = useState(true);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(null); // Error state for the form
   const [hoursEntry, setHoursEntry] = useState({ date: "", hours: "", task: "", eventId: "" });
   const { user: currentUser } = useAuth(); // Get the current user from auth context
   const [entries, setEntries] = useState([]);
@@ -86,12 +85,12 @@ const TrackHoursPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
- setError("");
+ setError(null); // Clear previous errors
     setSuccessMessage("");
 
  if (!validateForm()) return;
 
-    setSubmitting(true);
+    setLoadingSubmit(true);
     try {
       await addDoc(collection(db, 'volunteerHours'), { // Corrected typo in collection name if necessary
  ...hoursEntry,
@@ -117,7 +116,7 @@ const TrackHoursPage = () => {
  console.error("Error saving entry:", err);
  setError("Failed to log hours.");
     } finally {
- setSubmitting(false);
+ setLoadingSubmit(false);
     }
   };
 
@@ -191,9 +190,9 @@ const TrackHoursPage = () => {
               <button
                   type="submit"
                   className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                  disabled={submitting}
+                  disabled={loadingSubmit}
               >
-                  {submitting ? "Saving..." : "Log Hours"}
+                  {loadingSubmit ? "Saving..." : "Log Hours"}
               </button>
           </form>
 

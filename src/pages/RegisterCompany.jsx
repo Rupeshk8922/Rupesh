@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getFirestore, doc, setDoc, getDoc, collection } from "firebase/firestore";
+import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 // import { createHash } from "crypto-js"; // Removed hashing import
 
 const db = getFirestore();

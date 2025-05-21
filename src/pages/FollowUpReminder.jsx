@@ -1,28 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
+  MenuItem,
+  CircularProgress,
   TextField,
   Button,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Typography,
-  Box,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemSecondaryAction,
   IconButton,
-  CircularProgress,
-  Alert
+  Alert,
 } from '@mui/material';
-import CallIcon from '@mui/icons-material/Call';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import CallIcon from '@mui/icons-material/Call';
 import { collection, getDocs, addDoc } from 'firebase/firestore';
 import { db } from '../firebase/config.js';
 import { useNavigate } from 'react-router-dom';
 
-function FollowUpReminder() {
+const FollowUpReminder = () => {
   const [donors, setDonors] = useState([]);
   const [selectedDonor, setSelectedDonor] = useState('');
   const [followUpDate, setFollowUpDate] = useState('');
@@ -31,10 +22,11 @@ function FollowUpReminder() {
   const [reminders, setReminders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-    const [success, setSuccess] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   const navigate = useNavigate();
 
+  // Fetch donors from Firestore
   useEffect(() => {
     const fetchDonors = async () => {
       setLoading(true);
@@ -45,39 +37,45 @@ function FollowUpReminder() {
           ...doc.data(),
         }));
         setDonors(donorsData);
+        setError(null);
       } catch (err) {
         setError('Failed to load donors');
       } finally {
         setLoading(false);
       }
     };
-
     fetchDonors();
   }, []);
 
-  useEffect(() => {
-    const fetchReminders = async () => {
-      setLoading(true);
-      try {
-        const querySnapshot = await getDocs(collection(db, 'reminders'));
-        const remindersData = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setReminders(remindersData);
-      } catch (err) {
-        setError('Failed to load reminders');
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Fetch reminders from Firestore
+  const fetchReminders = async () => {
+    setLoading(true);
+    try {
+      const querySnapshot = await getDocs(collection(db, 'reminders'));
+      const remindersData = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setReminders(remindersData);
+      setError(null);
+    } catch (err) {
+      setError('Failed to load reminders');
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchReminders();
   }, []);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setLoading(true)
+    if (!selectedDonor) {
+      setError('Please select a donor');
+      return;
+    }
+    setLoading(true);
     try {
       await addDoc(collection(db, 'reminders'), {
         donorId: selectedDonor,
@@ -86,20 +84,15 @@ function FollowUpReminder() {
         reminderNote,
       });
       setSuccess(true);
-      setTimeout(() => {
-        setSuccess(false);
-      }, 3000);
-        const querySnapshot = await getDocs(collection(db, 'reminders'));
-        const remindersData = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setReminders(remindersData);
+      setError(null);
       setSelectedDonor('');
       setFollowUpDate('');
       setFollowUpTime('');
       setReminderNote('');
-
+      await fetchReminders(); // Refresh reminders list
+      setTimeout(() => {
+        setSuccess(false);
+      }, 3000);
     } catch (err) {
       setError('Failed to save reminder');
     } finally {
@@ -112,113 +105,140 @@ function FollowUpReminder() {
   };
 
   const handleCallDonor = (phoneNumber) => {
-        if (phoneNumber) {
+    if (phoneNumber) {
       window.location.href = 'tel:' + phoneNumber;
     }
   };
 
   return (
-    <Box sx={{ p: 3, maxWidth: 600, margin: 'auto' }}>
-      <Typography variant="h4" gutterBottom>
-        Follow Up Reminder
-      </Typography>
-      <form onSubmit={handleSubmit}>
-        <FormControl fullWidth required margin="normal">
-          <InputLabel id="donor-select-label">Donor</InputLabel>
-          <Select
-            labelId="donor-select-label"
-            id="donor-select"
-            value={selectedDonor}
-            label="Donor"
-            onChange={(e) => setSelectedDonor(e.target.value)}
-          >
-            {loading && <MenuItem disabled>Loading...</MenuItem>}
-            {error && <MenuItem disabled>Error: {error}</MenuItem>}
-            {donors.map((donor) => (
+    <div style={{ padding: 24, maxWidth: 600, margin: 'auto' }}>
+      <h4>Follow Up Reminder</h4>
+      <form onSubmit={handleSubmit} noValidate>
+        <TextField
+          select
+          label="Donor"
+          value={selectedDonor}
+          onChange={(e) => setSelectedDonor(e.target.value)}
+          fullWidth
+          margin="normal"
+          required
+          disabled={loading}
+          helperText={error && error.includes('donor') ? error : ''}
+        >
+          {loading ? (
+            <MenuItem disabled>Loading...</MenuItem>
+          ) : donors.length === 0 ? (
+            <MenuItem disabled>No donors found</MenuItem>
+          ) : (
+            donors.map((donor) => (
               <MenuItem key={donor.id} value={donor.id}>
                 {donor.name}
               </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+            ))
+          )}
+        </TextField>
+
         <TextField
-          fullWidth
-          margin="normal"
+          label="Follow Up Date"
           type="date"
           value={followUpDate}
           onChange={(e) => setFollowUpDate(e.target.value)}
-          required
-        />
-        <TextField
           fullWidth
           margin="normal"
+          InputLabelProps={{ shrink: true }}
+          required
+          disabled={loading}
+        />
+
+        <TextField
+          label="Follow Up Time"
           type="time"
           value={followUpTime}
           onChange={(e) => setFollowUpTime(e.target.value)}
+          fullWidth
+          margin="normal"
+          InputLabelProps={{ shrink: true }}
           required
+          disabled={loading}
         />
+
         <TextField
+          label="Reminder Note"
+          value={reminderNote}
+          onChange={(e) => setReminderNote(e.target.value)}
           fullWidth
           margin="normal"
           multiline
           rows={4}
-          label="Reminder Note"
-          value={reminderNote}
-          onChange={(e) => setReminderNote(e.target.value)}
           required
+          disabled={loading}
         />
+
         <Button
           type="submit"
           variant="contained"
           color="primary"
+          fullWidth
+          style={{ marginTop: 16 }}
           disabled={loading}
-          sx={{ mt: 2 }}
+          startIcon={loading && <CircularProgress size={20} />}
         >
-          {loading ? <CircularProgress size={24} /> : 'Save Reminder'}
+          Save Reminder
         </Button>
-                {success && (
-          <Alert severity="success" sx={{ mt: 2 }}>
+
+        {success && (
+          <Alert severity="success" style={{ marginTop: 16 }}>
             Reminder saved successfully!
           </Alert>
         )}
-        {error && (
-          <Alert severity="error" sx={{ mt: 2 }}>
+        {error && !error.includes('donor') && (
+          <Alert severity="error" style={{ marginTop: 16 }}>
             {error}
           </Alert>
         )}
       </form>
 
-      <Typography variant="h6" mt={4} gutterBottom>
-        Created Reminders
-      </Typography>
-      <List>
-        {reminders.map((reminder) => (
-          <ListItem key={reminder.id} divider>
-            <ListItemText
-              primary={`Reminder for: ${reminder.donorId}`}
-              secondary={`Date: ${reminder.followUpDate}, Time: ${reminder.followUpTime}, Note: ${reminder.reminderNote}`}
-            />
-            <ListItemSecondaryAction>
-              <IconButton
-                edge="end"
-                aria-label="view-profile"
-                onClick={() => handleViewProfile(reminder.donorId)}
-              >
-                <VisibilityIcon />
-              </IconButton>
-                                          <IconButton
-                edge="end"
-                aria-label="call-donor"
-                onClick={() => handleCallDonor(donors.find(donor=> donor.id === reminder.donorId)?.phoneNumber)}
-              >
-                <CallIcon />
-              </IconButton>
-            </ListItemSecondaryAction>
-          </ListItem>
-        ))}
-      </List>
-    </Box>
+      <h6 style={{ marginTop: 32 }}>Created Reminders</h6>
+      <ul style={{ listStyle: 'none', padding: 0 }}>
+        {reminders.map((reminder) => {
+          const donor = donors.find((d) => d.id === reminder.donorId);
+          return (
+            <li
+              key={reminder.id}
+              style={{
+                border: '1px solid #ddd',
+                borderRadius: 4,
+                padding: 12,
+                marginBottom: 12,
+              }}
+            >
+              <div>
+                Reminder for: {donor ? donor.name : reminder.donorId}
+              </div>
+              <div>
+                Date: {reminder.followUpDate}, Time: {reminder.followUpTime}
+              </div>
+              <div>Note: {reminder.reminderNote}</div>
+              <div>
+                <IconButton
+                  aria-label="view-profile"
+                  onClick={() => handleViewProfile(reminder.donorId)}
+                >
+                  <VisibilityIcon />
+                </IconButton>
+                <IconButton
+                  aria-label="call-donor"
+                  onClick={() => handleCallDonor(donor?.phoneNumber)}
+                >
+                  <CallIcon />
+                </IconButton>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
-}
+};
 
 export default FollowUpReminder;

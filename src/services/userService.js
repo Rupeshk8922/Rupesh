@@ -1,5 +1,5 @@
 // src/services/userService.js
-import { getFirestore, collection, query, where, getDocs } from "firebase/firestore";
+import { collection, query, where, getDocs, getFirestore } from "firebase/firestore";
 
 const db = getFirestore();
 
@@ -37,5 +37,28 @@ export async function fetchUsersForAssignment(companyId) {
   } catch (error) {
     console.error("Error fetching users for assignment:", error);
     throw error;
+  }
+}
+
+export async function getOfficers() {
+  try {
+    const officersRef = collection(db, 'users');
+    const q = query(officersRef, where('role', '==', 'officer'));
+    const querySnapshot = await getDocs(q);
+
+    const officers = [];
+    querySnapshot.forEach((doc) => {
+      const userData = doc.data();
+      officers.push({
+        uid: doc.id,
+        displayName: userData.displayName || userData.email, // Use display name or email for display
+      });
+    });
+
+    console.log("Fetched officers:", officers);
+    return officers;
+  } catch (error) {
+    console.error("Error fetching officers:", error);
+    throw error; // Re-throw the error for handling in the component
   }
 }

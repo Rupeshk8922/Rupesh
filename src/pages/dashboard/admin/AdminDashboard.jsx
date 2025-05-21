@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import {
   collection,
   query,
@@ -13,6 +13,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../../../firebase/config';
 import { useAuth } from '../../../contexts/authContext.jsx';
+
 const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -23,18 +24,15 @@ const AdminDashboard = () => {
   const [totalDonations, setTotalDonations] = useState(0);
   const [missedFollowups, setMissedFollowups] = useState(0);
   const [completedFollowups, setCompletedFollowups] = useState(0);
-  const [leads, setLeads] = useState([]);
   const [volunteers, setVolunteers] = useState([]);
   const [events, setEvents] = useState([]);
   const [totalUsers, setTotalUsers] = useState(0);
   const [lastVisible, setLastVisible] = useState(null);
-  
+  const [leads, setLeads] = useState([]); // Define leads state
+
   const { user, companyId } = useAuth();
-  // const { subscription } = useSubscription(); // Get subscription data
-  const navigate = useNavigate();
 
   const handleEditUser = (userId) => {
-    console.log("Edit user with ID:", userId);
     // navigate(`/dashboard/admin/users/edit/${userId}`);
   };
 
@@ -106,11 +104,12 @@ const AdminDashboard = () => {
       }
     };
 
+    // Define fetchLeads function
     const fetchLeads = async () => {
       if (!companyId) return;
       try {
-        const snap = await getDocs(collection(db, 'data', companyId, 'leads'));
-        setLeads(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        const leadsSnap = await getDocs(collection(db, 'data', companyId, 'leads'));
+        setLeads(leadsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
       } catch (err) {
         console.error("Error fetching leads:", err);
       }
@@ -137,11 +136,11 @@ const AdminDashboard = () => {
     };
 
     fetchUsers();
-    fetchPerformanceMetrics();
-    fetchLeads();
+    fetchPerformanceMetrics(); // Call this function to fetch performance metrics
+    fetchLeads(); // Now this function is defined
     fetchVolunteers();
     fetchEvents();
-  }, [companyId, currentPage, itemsPerPage]);
+  }, [companyId, currentPage, itemsPerPage, lastVisible]); // Added lastVisible to dependency array
 
   return (
     <div className="p-6">
@@ -261,12 +260,12 @@ const AdminDashboard = () => {
                     <td className="py-2 px-4 border-b">{lead.contactInfo}</td>
                     <td className="py-2 px-4 border-b">{lead.leadType}</td>
                     <td className="py-2 px-4 border-b">{lead.status}</td>
-                    {/* Display Next Follow-up Date - assuming it\'s a Timestamp */}
+                    {/* Display Next Follow-up Date - assuming it's a Timestamp */}
                     <td className="py-2 px-4 border-b">{lead.nextFollowUpDate ? lead.nextFollowUpDate.toDate().toLocaleDateString() : 'N/A'}</td>
                     <td className="py-2 px-4 border-b">{lead.assignedTo}</td>
                     <td className="py-2 px-4 border-b">{lead.location}</td>
                     <td className="py-2 px-4 border-b">{lead.source}</td>
-                    {/* Display Created On Date - assuming it\'s a Timestamp */}
+                    {/* Display Created On Date - assuming it's a Timestamp */}
                     <td className="py-2 px-4 border-b">{lead.createdOn ? lead.createdOn.toDate().toLocaleDateString() : 'N/A'}</td>
                     <td className="py-2 px-4 border-b">{lead.priorityLevel}</td>
                   </tr>
@@ -353,4 +352,3 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
-

@@ -1,9 +1,6 @@
 // src/pages/ReportsPage.jsx
 
-import React from 'react';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
-import { useAuth } from '../contexts/authContext.jsx';
-
+// Placeholder for the actual ReportsPage component logic
 const ReportsPage = () => {
   // Placeholder data
   const data = [
@@ -37,7 +34,7 @@ const ReportsPage = () => {
           </div>
         </div>
       ) : (
-        <div className="p-4 text-red-500 flex items-center justify-center min-h-[200px] text-center">
+        <div className="p-4 text-red-500 flex items-center justify-center h-64 text-center">
           You do not have access to view reports.
         </div>
       )}

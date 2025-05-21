@@ -1,9 +1,5 @@
-import React, { useState } from 'react';
-import { useSubscription } from '../../hooks/useSubscription.jsx'; // Assuming this hook exists and is renamed
-import { useFetchSubscriptionStatus } from '../../hooks/useFetchSubscriptionStatus.jsx'; // Assuming this hook exists and is renamed
-
 const ReportingDashboard = () => {
-  // Define a basic data structure in comments for Firestore storage
+  
   /*
   const userReportSubscriptions = {
     userId: '...',
@@ -33,7 +29,7 @@ const ReportingDashboard = () => {
 
   // Placeholder state for demonstration (would be loaded from Firestore)
   // TODO: Load subscriptions from Firestore for the current user
-  const [subscriptions, setSubscriptions] = useState([
+  const [subscriptions, setSubscriptions] = ([
      // Example initial subscribed state (remove this line and the following lines to simulate no subscriptions)
      {
        reportId: 'weeklyEventSummary',
@@ -49,12 +45,12 @@ const ReportingDashboard = () => {
   const handleSubscribe = (reportId) => {
     console.log(`// TODO: Implement Firestore logic to subscribe user to report: ${reportId}`);
     // In a real app, you would update the user's subscription document in Firestore
-    // For now, we'll just log the action.
+    
     alert(`Subscribed to ${reportId} (Placeholder)`);
   };
   
   const handleManageSubscription = (reportId) => {
-    console.log(`// TODO: Implement logic to manage subscription for report: ${reportId}`);
+    
     // In a real app, this could open a modal to edit frequency/customization or unsubscribe
     alert(`Manage subscription for ${reportId} (Placeholder)`);
   };
@@ -62,7 +58,7 @@ const ReportingDashboard = () => {
   const handleFrequencyChange = (reportId, newFrequency) => {
     console.log(`// TODO: Implement logic to update frequency for report: ${reportId} to ${newFrequency}`);
     // TODO: Update Firestore with the new frequency for the user's subscription
-    setSubscriptions(subscriptions.map(sub =>
+    setSubscriptions(subscriptions.map(sub => 
       sub.reportId === reportId ? { ...sub, frequency: newFrequency } : sub
     ));
   };
@@ -70,7 +66,7 @@ const ReportingDashboard = () => {
   const handleCustomizationChange = (reportId, option, value) => {
     console.log(`// TODO: Implement logic to update customization for report: ${reportId}, ${option}: ${value}, New State: ${value}`);
     // TODO: Update Firestore with the new customization options for the user's subscription
-     setSubscriptions(subscriptions.map(sub =>
+     setSubscriptions(subscriptions.map(sub => 
       sub.reportId === reportId ? { ...sub, customization: { ...sub.customization, [option]: value } } : sub
     ));
   };

@@ -1,5 +1,5 @@
 // src/services/leadsService.js
-import { collection, query, where, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase/config'; // Assuming you have initialized Firebase in config.js
 
 // Function to fetch leads for a specific company

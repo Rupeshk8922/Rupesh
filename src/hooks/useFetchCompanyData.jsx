@@ -2,65 +2,37 @@ import { useEffect, useState } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
 
-const useFetchCompanyData = (companyId) => {
-  const [companyData, setCompanyData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+export function useFetchCompanyData(companyId) {
+  const [company, setCompany] = useState(null);
+  const [companyDataLoading, setCompanyDataLoading] = useState(true);
 
   useEffect(() => {
-    let isMounted = true;
-
-    const fetchCompanyData = async () => {
-      // Only attempt to fetch if companyId is available
-      if (!companyId) {
-        if (isMounted) {
-          setCompanyData(null);
-          setLoading(false);
-        }
-        return;
-      }
-
-      setLoading(true);
-      setError(null);
-
+    setCompanyDataLoading(true); // Set loading to true when effect runs
+    console.log("🔥 useFetchCompanyData effect running for companyId:", companyId);
+    if (!companyId) {
+      console.log("🔥 useFetchCompanyData: Invalid companyId, exiting effect.");
+      setCompanyDataLoading(false);
+      return;
+    }
+    
+    const fetchCompany = async () => {
       try {
-        const companyDocRef = doc(db, 'companies', companyId);
-        const companyDocSnap = await getDoc(companyDocRef);
-
-        if (isMounted) {
-          if (companyDocSnap.exists()) {
-            setCompanyData(companyDocSnap.data());
-          } else {
-            setCompanyData(null);
-          }
-          setLoading(false);
+        const companyRef = doc(db, "companies", companyId);
+        const companySnap = await getDoc(companyRef);
+        if (companySnap.exists()) {
+          setCompany(companySnap.data());
+        } else {
+          console.warn("❗ No such company in DB for ID:", companyId);
         }
       } catch (err) {
-        if (isMounted) {
-          console.error('Error fetching company data:', err);
-          setError(err);
-          setLoading(false);
-        }
+        console.error("❌ Error fetching company data:", err);
+      } finally {
+        setCompanyDataLoading(false);
       }
     };
 
-    // Add a check here to ensure companyId is available before fetching
-    if (companyId) {
-      fetchCompanyData();
-    } else {
-       // If companyId is not available yet, set loading to false
-       if(isMounted) {
-         setLoading(false);
-       }
-    }
+    fetchCompany();
+  }, [companyId]);
 
-
-    return () => {
-      isMounted = false;
-    };
-  }, [companyId]); // Dependency array includes companyId
-
-  return { companyData, loading, error };
-};
-
-export default useFetchCompanyData;
+  return { company, companyDataLoading };
+}

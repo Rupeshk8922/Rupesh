@@ -1,21 +1,43 @@
-import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/authContext.jsx';
+import { Link } from 'react-router-dom';
+import { USER_ROLES } from '../routesConfig.jsx'; // Import USER_ROLES
+
 function SidebarLayout() {
   const { user, userRole } = useAuth(); // Get user and userRole from context
-  
-  // Define sidebar items with their allowed rolesgit
+
+  // Define sidebar items with their allowed roles
   const sidebarItems = [
-    { label: 'Dashboard', path: '/dashboard', roles: ['admin', 'Manager', 'Outreach Officer', 'Volunteer Coordinator', 'CSR', 'Telecaller'] },
-    { label: 'Leads', path: '/dashboard/leads', roles: ['admin', 'Manager', 'Outreach Officer', 'Telecaller'] },
-    { label: 'Add Lead', path: '/dashboard/leads/add', roles: ['admin', 'Manager', 'Outreach Officer', 'Telecaller'] },
-    { label: 'Events', path: '/dashboard/events', roles: ['admin', 'Manager', 'Outreach Officer', 'Volunteer Coordinator'] },
-    { label: 'Add Event', path: '/dashboard/events/add', roles: ['admin', 'Manager', 'Outreach Officer'] },
-    { label: 'Volunteers', path: '/dashboard/volunteers', roles: ['admin', 'Manager', 'Outreach Officer', 'Volunteer Coordinator'] },
-    { label: 'Add Volunteer', path: '/dashboard/volunteers/add', roles: ['admin', 'Manager', 'Outreach Officer'] },
-    { label: 'Reports & KPIs', path: '/dashboard/reports', roles: ['admin', 'Manager'] },
-    { label: 'Users / Team Management', path: '/dashboard/users', roles: ['admin'] },
-    { label: 'Profile / Settings', path: '/dashboard/settings/profile', roles: ['admin', 'Manager', 'Outreach Officer', 'Volunteer Coordinator', 'CSR', 'Telecaller'] }, // Assuming a generic settings route for all roles
-    // Add other sidebar items as needed, with their respective roles
+    { label: 'Dashboard', path: '/dashboard', roles: [USER_ROLES.ADMIN, USER_ROLES.MANAGER, USER_ROLES.OUTREACH_OFFICER, USER_ROLES.VOLUNTEER_COORDINATOR, USER_ROLES.CSR, USER_ROLES.TELECALLER] },
+    { label: 'Leads', path: '/dashboard/leads', roles: [USER_ROLES.ADMIN, USER_ROLES.MANAGER, USER_ROLES.OUTREACH_OFFICER, USER_ROLES.TELECALLER] },
+    { label: 'Add Lead', path: '/dashboard/leads/add', roles: [USER_ROLES.ADMIN, USER_ROLES.MANAGER, USER_ROLES.OUTREACH_OFFICER, USER_ROLES.TELECALLER] },
+    { label: 'Events', path: '/dashboard/events', roles: [USER_ROLES.ADMIN, USER_ROLES.MANAGER, USER_ROLES.OUTREACH_OFFICER, USER_ROLES.VOLUNTEER_COORDINATOR] },
+    { label: 'Add Event', path: '/dashboard/events/add', roles: [USER_ROLES.ADMIN, USER_ROLES.MANAGER, USER_ROLES.OUTREACH_OFFICER] },
+    { label: 'Volunteers', path: '/dashboard/volunteers', roles: [USER_ROLES.ADMIN, USER_ROLES.MANAGER, USER_ROLES.OUTREACH_OFFICER, USER_ROLES.VOLUNTEER_COORDINATOR] },
+    { label: 'Add Volunteer', path: '/dashboard/volunteers/add', roles: [USER_ROLES.ADMIN, USER_ROLES.MANAGER, USER_ROLES.OUTREACH_OFFICER] },
+    { label: 'Reports & KPIs', path: '/dashboard/reports', roles: [USER_ROLES.ADMIN, USER_ROLES.MANAGER] },
+    { label: 'Users / Team Management', path: '/dashboard/users', roles: [USER_ROLES.ADMIN] },
+    { label: 'Profile / Settings', path: '/dashboard/settings/profile', roles: Object.values(USER_ROLES) }, // Assuming a generic settings route for all roles
+    // Outreach Officer and Manager specific links
+    { label: 'Targets', path: '/dashboard/outreach/targets', roles: [USER_ROLES.OUTREACH_OFFICER, USER_ROLES.MANAGER] },
+    { label: 'Donors', path: '/dashboard/outreach/donors', roles: [USER_ROLES.OUTREACH_OFFICER, USER_ROLES.MANAGER] },
+    { label: 'Map', path: '/dashboard/outreach/map', roles: [USER_ROLES.OUTREACH_OFFICER, USER_ROLES.MANAGER] },
+    { label: 'Reminders', path: '/dashboard/outreach/reminders', roles: [USER_ROLES.OUTREACH_OFFICER, USER_ROLES.MANAGER] },
+    { label: 'Performance', path: '/dashboard/outreach/performance', roles: [USER_ROLES.OUTREACH_OFFICER, USER_ROLES.MANAGER] },
+    { label: 'Reports (Outreach)', path: '/dashboard/outreach/reports', roles: [USER_ROLES.OUTREACH_OFFICER, USER_ROLES.MANAGER] },
+    // CSR Officer specific links
+    { label: 'CSR Leads', path: '/dashboard/csr/leads', roles: [USER_ROLES.CSR] },
+    { label: 'Projects', path: '/dashboard/csr/projects', roles: [USER_ROLES.CSR] },
+    { label: 'Impact Reports', path: '/dashboard/csr/impact-reports', roles: [USER_ROLES.CSR] },
+    // Volunteer specific links
+    { label: 'Assigned Events', path: '/dashboard/volunteer/assigned-events', roles: [USER_ROLES.VOLUNTEER_COORDINATOR] },
+    { label: 'Tasks', path: '/dashboard/volunteer/tasks', roles: [USER_ROLES.VOLUNTEER_COORDINATOR] },
+    { label: 'Join Causes', path: '/dashboard/volunteer/join-causes', roles: [USER_ROLES.VOLUNTEER_COORDINATOR] },
+    { label: 'Leaderboard', path: '/dashboard/volunteer/leaderboard', roles: [USER_ROLES.VOLUNTEER_COORDINATOR] },
+    // Telecaller specific links
+    { label: 'Call List', path: '/dashboard/telecaller/call-list', roles: [USER_ROLES.TELECALLER] },
+    { label: 'Followups', path: '/dashboard/telecaller/followups', roles: [USER_ROLES.TELECALLER] },
+    { label: 'Scripts', path: '/dashboard/telecaller/scripts', roles: [USER_ROLES.TELECALLER] },
+    { label: 'Update Status', path: '/dashboard/telecaller/update-status', roles: [USER_ROLES.TELECALLER] },
   ];
 
   return (
@@ -34,49 +56,7 @@ function SidebarLayout() {
               </li>
             )
           ))}
-          </ul>
-
-        {/* Outreach Officer and Manager navigation links */}
-        {(userRole === 'outreach' || userRole === 'manager') && (
-          <ul>
-            <li><Link to="/dashboard/outreach/targets" className="block py-2 px-4 text-gray-300 hover:bg-gray-700 hover:text-white">Targets</Link></li>
-            <li><Link to="/dashboard/outreach/donors" className="block py-2 px-4 text-gray-300 hover:bg-gray-700 hover:text-white">Donors</Link></li>
-            <li><Link to="/dashboard/outreach/map" className="block py-2 px-4 text-gray-300 hover:bg-gray-700 hover:text-white">Map</Link></li>
-            <li><Link to="/dashboard/outreach/reminders" className="block py-2 px-4 text-gray-300 hover:bg-gray-700 hover:text-white">Reminders</Link></li>
-            <li><Link to="/dashboard/outreach/performance" className="block py-2 px-4 text-gray-300 hover:bg-gray-700 hover:text-white">Performance</Link></li>
-            <li><Link to="/dashboard/outreach/reports" className="block py-2 px-4 text-gray-300 hover:bg-gray-700 hover:text-white">Reports</Link></li>
-          </ul>
-        )}
-
-        {/* CSR Officer navigation links */}
-        {userRole === 'csr' && (
-          <ul>
-            <li><Link to="/dashboard/csr/leads" className="block py-2 px-4 text-gray-300 hover:bg-gray-700 hover:text-white">CSR Leads</Link></li>
-            <li><Link to="/dashboard/csr/projects" className="block py-2 px-4 text-gray-300 hover:bg-gray-700 hover:text-white">Projects</Link></li>
-            <li><Link to="/dashboard/csr/impact-reports" className="block py-2 px-4 text-gray-300 hover:bg-gray-700 hover:text-white">Impact Reports</Link></li>
-          </ul>
-        )}
-
-        {/* Volunteer navigation links */}
-        {userRole === 'volunteer' && (
-          <ul>
-            <li><Link to="/dashboard/volunteer/assigned-events" className="block py-2 px-4 text-gray-300 hover:bg-gray-700 hover:text-white">Assigned Events</Link></li>
-            <li><Link to="/dashboard/volunteer/tasks" className="block py-2 px-4 text-gray-300 hover:bg-gray-700 hover:text-white">Tasks</Link></li>
-            <li><Link to="/dashboard/volunteer/join-causes" className="block py-2 px-4 text-gray-300 hover:bg-gray-700 hover:text-white">Join Causes</Link></li>
-            <li><Link to="/dashboard/volunteer/leaderboard" className="block py-2 px-4 text-gray-300 hover:bg-gray-700 hover:text-white">Leaderboard</Link></li>
-          </ul>
-        )}
-
-        {/* Telecaller navigation links */}
-        {userRole === 'telecaller' && (
-          <ul>
-            <li><Link to="/dashboard/telecaller/call-list" className="block py-2 px-4 text-gray-300 hover:bg-gray-700 hover:text-white">Call List</Link></li>
-            <li><Link to="/dashboard/telecaller/followups" className="block py-2 px-4 text-gray-300 hover:bg-gray-700 hover:text-white">Followups</Link></li>
-            <li><Link to="/dashboard/telecaller/scripts" className="block py-2 px-4 text-gray-300 hover:bg-gray-700 hover:text-white">Scripts</Link></li>
-            <li><Link to="/dashboard/telecaller/update-status" className="block py-2 px-4 text-gray-300 hover:bg-gray-700 hover:text-white">Update Status</Link></li>
-          </ul>
-        )}
-
+        </ul>
       </nav>
     </div>
   );
