@@ -1,1 +1,1 @@
-export { auth, db, functions, firebaseApp } from './config';
+export { auth, db, functions, firebaseApp, firebaseSendPasswordResetEmail } from './config';

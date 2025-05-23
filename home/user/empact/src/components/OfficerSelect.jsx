@@ -1,8 +1,7 @@
-// src/components/OfficerSelect.jsx
 import React, { useState, useEffect } from 'react';
 import { collection, getDocs, doc, getDoc, query, where } from 'firebase/firestore';
-import { db } from '@/firebase/config';       // <-- use alias '@'
-import { useAuth } from '@/hooks/useAuth';    // <-- use alias '@'
+import { db } from '@/firebase/config';
+import { useAuth } from '@/hooks/useAuth';
 
 export function OfficerSelect({ onOfficerChange, currentOfficerId }) {
   const [officers, setOfficers] = useState([]);
@@ -13,19 +12,21 @@ export function OfficerSelect({ onOfficerChange, currentOfficerId }) {
 
   useEffect(() => {
     const fetchOfficers = async () => {
-      if (!user || !user.companyId) {
-        setError('User or company information not available.');
+      if (!user) {
+        setError('User information not available.');
         setLoading(false);
         return;
       }
 
+      // Use local variable for companyId to avoid mutating user
+      let companyId = user.companyId;
+
       try {
-        // Defensive: fetch companyId if missing from user
-        if (!user.companyId) {
+        if (!companyId) {
           const userDocRef = doc(db, 'users', user.uid);
           const userDocSnap = await getDoc(userDocRef);
           if (userDocSnap.exists()) {
-            user.companyId = userDocSnap.data().companyId;
+            companyId = userDocSnap.data().companyId;
           } else {
             setError('User document not found.');
             setLoading(false);
@@ -36,7 +37,7 @@ export function OfficerSelect({ onOfficerChange, currentOfficerId }) {
         const officersCollectionRef = collection(db, 'users');
         const q = query(
           officersCollectionRef,
-          where('companyId', '==', user.companyId),
+          where('companyId', '==', companyId),
           where('role', '==', 'officer')
         );
         const querySnapshot = await getDocs(q);
@@ -53,6 +54,10 @@ export function OfficerSelect({ onOfficerChange, currentOfficerId }) {
             setSelectedOfficer(initialOfficer.id);
             onOfficerChange(initialOfficer.id);
           }
+        } else {
+          // Optionally clear selection if no currentOfficerId
+          setSelectedOfficer('');
+          onOfficerChange('');
         }
       } catch (err) {
         console.error('Error fetching officers:', err);
@@ -71,7 +76,7 @@ export function OfficerSelect({ onOfficerChange, currentOfficerId }) {
   };
 
   if (loading) return <div>Loading officers...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (error) return <div className="text-red-600">Error: {error}</div>;
 
   return (
     <div className="grid gap-2">
@@ -79,13 +84,12 @@ export function OfficerSelect({ onOfficerChange, currentOfficerId }) {
       <select
         id="officer-select"
         value={selectedOfficer}
-        onBlur={(e) => handleValueChange(e.target.value)}
         onChange={(e) => handleValueChange(e.target.value)}
       >
         <option value="">Select Officer</option>
         {officers.map((officer) => (
           <option key={officer.id} value={officer.id}>
-            {officer.displayName}
+            {officer.displayName || `${officer.firstName} ${officer.lastName}`}
           </option>
         ))}
       </select>

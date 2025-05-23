@@ -5,11 +5,10 @@ import { useAuth } from './useAuth';
 
 /**
  * Custom hook to fetch events for the current company from Firestore.
- * Supports loading and error states. Uses one-time fetch.
+ * Supports loading and error states. Uses one-time fetch by default.
  *
- * Future-ready:
- * - Easily upgrade to real-time updates using `onSnapshot`.
- * - Pagination logic can be added using `startAfter` and `limit`.
+ * To enable real-time updates, switch from getDocs() to onSnapshot()
+ * (see commented code inside useEffect).
  *
  * @returns {{ events: Array, loading: boolean, error: Error | null }}
  */
@@ -20,37 +19,34 @@ export default function useEvents() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    if (!companyId) {
+      setEvents([]);
+      setLoading(false);
+      return;
+    }
+
+    if (!db) {
+      setError(new Error("Firestore DB not initialized"));
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    const eventsRef = collection(db, 'data', companyId, 'events');
+    const q = query(eventsRef, orderBy('date', 'asc'));
+
+    // ONE-TIME FETCH VERSION:
     const fetchEvents = async () => {
-      if (!companyId) {
-        setEvents([]);
-        setLoading(false);
-        return;
-      }
-
-      if (!db) {
-        setError(new Error("Database not initialized"));
-        setLoading(false);
-        return;
-      }
-
-      setLoading(true);
-      setError(null);
-
       try {
-        const eventsRef = collection(db, 'data', companyId, 'events');
-        const q = query(eventsRef, orderBy('date', 'asc'));
-
-        // Replace with onSnapshot for real-time updates if needed
         const snapshot = await getDocs(q);
-
         const eventsData = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
         }));
-
         setEvents(eventsData);
       } catch (err) {
-        // Optionally refine: handle by error.code for more specific messages
         setError(err);
       } finally {
         setLoading(false);
@@ -61,17 +57,24 @@ export default function useEvents() {
       fetchEvents();
     }
 
-    // To enable real-time updates, replace getDocs with onSnapshot
-    // and return the unsubscribe function here:
-    //
-    // const unsubscribe = onSnapshot(q, (snapshot) => { ... });
-    // return () => unsubscribe();
+    // REAL-TIME VERSION (UNCOMMENT TO USE):
+    // if (!authLoading) {
+    //   const unsubscribe = onSnapshot(q, snapshot => {
+    //     const eventsData = snapshot.docs.map(doc => ({
+    //       id: doc.id,
+    //       ...doc.data(),
+    //     }));
+    //     setEvents(eventsData);
+    //     setLoading(false);
+    //     setError(null);
+    //   }, err => {
+    //     setError(err);
+    //     setLoading(false);
+    //   });
+    //   return () => unsubscribe();
+    // }
 
   }, [companyId, authLoading]);
 
-  return {
-    events,
-    loading: loading || authLoading,
-    error,
-  };
+  return { events, loading: loading || authLoading, error };
 }

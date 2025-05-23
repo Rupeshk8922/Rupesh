@@ -1,15 +1,17 @@
 {
-  "projects": {
-    "default": "empact-yhwq3"
-  },
-  "targets": {
-    "empact-yhwq3": {
-      "hosting": {
-        "studio": [
-          "empact-yhwq3"
-        ]
+  "hosting": {
+    "target": "studio",
+    "public": "build",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
       }
-    }
-  },
-  "etags": {}
+    ]
+  }
 }

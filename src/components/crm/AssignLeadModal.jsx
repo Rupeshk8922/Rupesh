@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
-import { collection, query, where, getDocs, doc, updateDoc } from 'firebase/firestore'; // No hooks used here
-import { db } from '../../firebase/config'; // Import your Firestore instance
+import { collection, query, where, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { db } from '../../firebase/config';
 
 const AssignLeadModal = ({ isOpen, onClose, leadId }) => {
   const [assignableUsers, setAssignableUsers] = useState([]);
   const [selectedUserId, setSelectedUserId] = useState('');
-  const [loading, setLoading] = useState(false); // State for loading indicator
-  const [error, setError] = useState(null); // State for error messages
-  const [success, setSuccess] = useState(false); // State for success message
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -29,12 +29,18 @@ const AssignLeadModal = ({ isOpen, onClose, leadId }) => {
       };
 
       fetchAssignableUsers();
-      // Reset selected user and messages when modal opens
       setSelectedUserId('');
       setError(null);
       setSuccess(false);
+    } else {
+      // Reset all states on modal close
+      setAssignableUsers([]);
+      setSelectedUserId('');
+      setLoading(false);
+      setError(null);
+      setSuccess(false);
     }
-  }, [isOpen]); // Fetch users when the modal opens
+  }, [isOpen]);
 
   const handleAssignButtonClick = async () => {
     if (!selectedUserId) {
@@ -50,10 +56,10 @@ const AssignLeadModal = ({ isOpen, onClose, leadId }) => {
       const leadDocRef = doc(db, 'leads', leadId);
       await updateDoc(leadDocRef, {
         assignedTo: selectedUserId,
-        // You might want to add other fields here, like assignedBy, assignedAt, etc.
+        assignedAt: new Date(),
+        // optionally assignedBy: currentUserId if you have it
       });
       setSuccess(true);
-      // Optionally close the modal after a short delay to show the success message
       setTimeout(() => {
         onClose();
       }, 1500);
@@ -68,25 +74,37 @@ const AssignLeadModal = ({ isOpen, onClose, leadId }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded shadow-lg max-w-sm w-full">
-        <h2 className="text-lg font-bold mb-4">Assign Lead</h2>
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="assign-lead-title"
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+    >
+      <div className="bg-white p-6 rounded shadow-lg max-w-sm w-full" tabIndex={-1}>
+        <h2 id="assign-lead-title" className="text-lg font-bold mb-4">
+          Assign Lead
+        </h2>
         <p>Assigning Lead ID: {leadId}</p>
 
         <div className="my-4">
-          <p>Select a user to assign this lead to:</p>
+          <label htmlFor="assign-user-select" className="block mb-1 font-medium">
+            Select a user to assign this lead to:
+          </label>
           {loading && <p>Loading users...</p>}
           {error && <p className="text-red-500">{error}</p>}
           {!loading && !error && (
             <select
+              id="assign-user-select"
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
               value={selectedUserId}
               onChange={(e) => setSelectedUserId(e.target.value)}
               disabled={loading}
             >
               <option value="">-- Select User --</option>
-              {assignableUsers.map(user => (
-                <option key={user.id} value={user.id}>{user.name || user.email}</option> // Display name or email
+              {assignableUsers.map(({ id, name, email }) => (
+                <option key={id} value={id}>
+                  {name || email}
+                </option>
               ))}
             </select>
           )}

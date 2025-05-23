@@ -1,3 +1,3 @@
-export const triggerEmailNotification = (to, subject, body) => {
+export const triggerEmailNotification = () => {
   // TODO: Implement actual email notification triggering
 };

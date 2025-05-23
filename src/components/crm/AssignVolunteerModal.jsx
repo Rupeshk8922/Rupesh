@@ -1,15 +1,13 @@
 import { useState, useEffect } from 'react';
 import {
   collection,
-  query,
-  where,
   getDocs,
   doc,
   updateDoc,
 } from 'firebase/firestore';
-import { db } from '../../firebase/config'; // Adjust path if needed
+import { db } from '../../firebase/config';
 
-const AssignVolunteerModal = ({ isOpen, onClose, volunteerId }) => {
+const AssignVolunteerModal = ({ isOpen, onClose, volunteerId, onAssignSuccess }) => {
   const [availableEvents, setAvailableEvents] = useState([]);
   const [selectedEventId, setSelectedEventId] = useState('');
   const [loading, setLoading] = useState(false);
@@ -23,12 +21,10 @@ const AssignVolunteerModal = ({ isOpen, onClose, volunteerId }) => {
         setError(null);
         try {
           const eventsCollectionRef = collection(db, 'events');
-          const q = query(eventsCollectionRef, where('status', '!=', 'completed'));
-          const querySnapshot = await getDocs(q);
-          const eventsList = querySnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
+          const querySnapshot = await getDocs(eventsCollectionRef);
+          const eventsList = querySnapshot.docs
+            .map(doc => ({ id: doc.id, ...doc.data() }))
+            .filter(event => event.status !== 'completed');
           setAvailableEvents(eventsList);
         } catch (err) {
           setError('Failed to fetch available events.');
@@ -59,9 +55,15 @@ const AssignVolunteerModal = ({ isOpen, onClose, volunteerId }) => {
       const volunteerDocRef = doc(db, 'volunteers', volunteerId);
       await updateDoc(volunteerDocRef, {
         assignedEvent: selectedEventId,
+        assignedAt: new Date(),
       });
 
       setSuccess(true);
+
+      if (onAssignSuccess) {
+        onAssignSuccess();
+      }
+
       setTimeout(() => {
         onClose();
       }, 1500);
@@ -76,9 +78,16 @@ const AssignVolunteerModal = ({ isOpen, onClose, volunteerId }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="assign-volunteer-title"
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+    >
       <div className="bg-white p-6 rounded shadow-lg max-w-sm w-full">
-        <h2 className="text-lg font-bold mb-4">Assign Volunteer to Event</h2>
+        <h2 id="assign-volunteer-title" className="text-lg font-bold mb-4">
+          Assign Volunteer to Event
+        </h2>
         <p className="text-sm text-gray-600 mb-2">Volunteer ID: {volunteerId}</p>
 
         <div className="my-4">
@@ -103,7 +112,7 @@ const AssignVolunteerModal = ({ isOpen, onClose, volunteerId }) => {
         </div>
 
         {success && (
-          <p className="text-green-600 text-sm mb-4">
+          <p className="text-green-500 text-sm mb-4">
             Volunteer assigned successfully!
           </p>
         )}

@@ -8,14 +8,22 @@ const useModal = () => {
     actions: [],
   });
 
-  const showModal = ({ title, message, actions = [] }) => {
+  // Optional: store onClose callback to run after closeModal
+  const [onCloseCallback, setOnCloseCallback] = useState(null);
+
+  const showModal = ({ title, message, actions = [], onClose = null }) => {
     setModalContent({ title, message, actions });
     setIsModalOpen(true);
+    setOnCloseCallback(() => onClose);
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
     setModalContent({ title: '', message: '', actions: [] });
+    if (typeof onCloseCallback === 'function') {
+      onCloseCallback();
+      setOnCloseCallback(null);
+    }
   };
 
   return {

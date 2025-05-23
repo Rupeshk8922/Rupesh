@@ -10,45 +10,52 @@ const db = admin.firestore();
 exports.createUser = functions.https.onRequest((req, res) => {
   cors(req, res, async () => {
     if (req.method !== "POST") {
-      return res.status(405).send({ error: "Method not allowed" });
+      return res.status(405).json({ error: "Method Not Allowed. Use POST." });
     }
 
     try {
       const { name, email } = req.body;
 
       // Validate name
-      if (!name || typeof name !== "string" || name.trim() === "") {
-        return res.status(400).send({ error: "Invalid or missing name" });
+      if (!name || typeof name !== "string" || !name.trim()) {
+        return res.status(400).json({ error: "Invalid or missing 'name'" });
       }
 
       // Validate email
-      if (!email || typeof email !== "string" || !email.includes("@")) {
-        return res.status(400).send({ error: "Invalid or missing email" });
+      if (
+        !email ||
+        typeof email !== "string" ||
+        !email.includes("@") ||
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+      ) {
+        return res.status(400).json({ error: "Invalid or missing 'email'" });
       }
 
-      // Check if user already exists
-      const existingUser = await db
+      // Check for existing user
+      const userSnapshot = await db
         .collection("users")
-        .where("email", "==", email)
+        .where("email", "==", email.toLowerCase())
         .limit(1)
         .get();
 
-      if (!existingUser.empty) {
-        return res.status(409).send({ error: "User with this email already exists" });
+      if (!userSnapshot.empty) {
+        return res.status(409).json({ error: "User with this email already exists." });
       }
 
-      // Add new user
+      // Add new user to Firestore
       const userRef = await db.collection("users").add({
-        name,
-        email,
+        name: name.trim(),
+        email: email.toLowerCase().trim(),
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
       });
 
-      return res.status(200).send({ message: "User created", id: userRef.id });
-
+      return res.status(200).json({
+        message: "User successfully created.",
+        id: userRef.id,
+      });
     } catch (error) {
-      console.error("Error creating user:", error);
-      return res.status(500).send({ error: "Internal Server Error" });
+      console.error("🔥 Error in createUser function:", error);
+      return res.status(500).json({ error: "Internal Server Error" });
     }
   });
 });

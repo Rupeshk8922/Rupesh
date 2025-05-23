@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
 // import AssignVolunteerModal from '../modals/AssignVolunteerModal';
+import AddVolunteerModal from '@/components/AddVolunteerModal';
+import AssignVolunteerModal from '@/components/AssignVolunteerModal';
+import AddEventModal from '@/components/AddEventModal';
 import axios from 'axios';
 
 function ProjectDetails() {

@@ -1,35 +1,44 @@
-import { useState, useEffect } from 'react'
-import { projectStorage } from '../firebase/config'
+// src/hooks/useStorage.js
+
+import { useState, useEffect } from 'react';
+import { projectStorage } from '../firebase/config';
 import { ref, uploadBytesResumable } from 'firebase/storage';
 
+/**
+ * Hook for uploading a file to Firebase Storage and tracking progress.
+ */
 export const useStorage = (file) => {
   const [progress, setProgress] = useState(0);
-
-
+  const [error, setError] = useState(null);
+  const [url, setUrl] = useState(null);
 
   useEffect(() => {
-    // references
-    const storageRef = ref(projectStorage, file.name);
+    if (!file) return;
 
-    // upload the file
+    const storageRef = ref(projectStorage, file.name);
     const uploadTask = uploadBytesResumable(storageRef, file);
 
-    // listen for state changes, errors, and completion of the upload.
-    uploadTask.on('state_changed',
+    const unsubscribe = uploadTask.on(
+      'state_changed',
       (snapshot) => {
-        // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
         const percentage = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
         setProgress(percentage);
       },
-      (error) => {
-        // A full list of error codes is available at
-        // https://firebase.google.com/docs/storage/web/handle-errors
-        console.log(error);
-
+      (err) => {
+        setError(err.message || 'Upload failed');
+      },
+      async () => {
+        try {
+          const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+          setUrl(downloadURL);
+        } catch (err) {
+          setError(err.message || 'Could not get download URL');
+        }
       }
     );
 
+    return () => unsubscribe();
   }, [file]);
 
-  return { progress };
-}
+  return { progress, error, url };
+};

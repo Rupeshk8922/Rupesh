@@ -1,54 +1,36 @@
-import {
-  useState
-} from 'react';
-import {
-  createUserWithEmailAndPassword,
-  updateProfile,
-  auth
-} from 'firebase/auth'
-import {
-  useAuthContext
-} from './useauthContext'
+// src/hooks/useSignup.js
 
+import { useState } from 'react';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { auth } from '../firebase';
+import { useAuthContext } from './useAuthContext';
+
+/**
+ * Custom hook to sign up a user and update display name.
+ */
 export const useSignup = () => {
-  const [error, setError] = useState(null)
-  const [isPending, setIsPending] = useState(false)
-  const {
-    dispatch
-  } = useAuthContext()
+  const [error, setError] = useState(null);
+  const [isPending, setIsPending] = useState(false);
+  const { dispatch } = useAuthContext();
 
   const signup = async (email, password, displayName) => {
-    setError(null)
-    setIsPending(true)
+    setError(null);
+    setIsPending(true);
+
     try {
-      // signup user
-      const res = await createUserWithEmailAndPassword(auth, email, password)
+      const res = await createUserWithEmailAndPassword(auth, email, password);
+      if (!res) throw new Error('Signup failed. Please try again.');
 
+      await updateProfile(res.user, { displayName });
 
-      if (!res) {
-        throw new Error('Could not complete signup')
-      }
+      dispatch({ type: 'LOGIN', payload: res.user });
 
-      // add display name to user
-      await updateProfile(res.user, {
-        displayName
-      })
-
-      // dispatch login action
-      dispatch({
-        type: 'LOGIN',
-        payload: res.user
-      })
-
+      setIsPending(false);
     } catch (err) {
-      console.log(err.message)
-      // setError(err.message) // This line is commented out, consider removing
-      setError(err.message)
-      setIsPending(false)
+      setError(err.message);
+      setIsPending(false);
     }
-  }
+  };
 
-  return {
-    signup
-  }
-}
+  return { signup, error, isPending };
+};

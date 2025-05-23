@@ -4,56 +4,79 @@ import useOtpVerification from '../hooks/useOtpVerification';
 function VerifyCompanyPage() {
   const { otp, setOtp, isSubmitting, error, message, handleVerifyOtp } =
     useOtpVerification();
-  const [formError, setFormError] = useState(null); // Local state for form validation errors
+  const [formError, setFormError] = useState(null);
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
     if (!otp) {
       setFormError('OTP is required.');
       return;
     }
-    if (otp.length !== 6 || !/^\d+$/.test(otp)) {
+    if (otp.length !== 6 || !/^\d{6}$/.test(otp)) {
       setFormError('OTP must be exactly 6 digits.');
       return;
     }
 
-    setFormError(null); // Clear previous form errors
+    setFormError(null);
 
-    // In a real app, you'd get the companyId from the previous page or local storage
-    // For now, we'll use a placeholder.
-    const companyId = 'placeholderCompanyId'; // Replace with actual logic to get companyId
+    // TODO: Replace with actual logic to get companyId (from context, props, or storage)
+    const companyId = 'placeholderCompanyId';
 
     await handleVerifyOtp(companyId, otp);
   };
 
+  // Limit input to digits only, max length 6
+  const handleOtpChange = (e) => {
+    const value = e.target.value;
+    if (value === '' || /^\d{0,6}$/.test(value)) {
+      setOtp(value);
+    }
+  };
+
   return (
-    <div className="verify-company-page">
-      <div className="form-container">
+    <div className="verify-company-page max-w-md mx-auto p-6">
+      <div className="form-container bg-white shadow-md rounded p-6">
         <h2 className="text-2xl font-bold mb-4 text-center">Verify Company</h2>
-        {message && <p className="success-message">{message}</p>}
-        {formError && <p className="text-red-600 text-sm">{formError}</p>} {/* Display form validation errors */}
-        {error && <p className="text-red-600 text-sm">{error}</p>} {/* Display hook (API) errors */}
-        <form onSubmit={handleSubmit} className="verify-form">
+
+        {message && (
+          <p className="success-message text-green-600 mb-2">{message}</p>
+        )}
+        {formError && <p className="text-red-600 text-sm mb-2">{formError}</p>}
+        {error && <p className="text-red-600 text-sm mb-2">{error}</p>}
+
+        <form onSubmit={handleSubmit} className="verify-form space-y-4">
           <div className="input-group">
-            <label htmlFor="otp" className="input-label">
+            <label htmlFor="otp" className="input-label block mb-1 font-semibold">
               OTP
             </label>
             <input
-              type="number" // Use type="number" for better mobile keyboards
+              type="text"
               id="otp"
-              className="input-field"
+              name="otp"
+              className="input-field border border-gray-300 rounded px-3 py-2 w-full"
               value={otp}
-              onChange={(event) => setOtp(event.target.value)}
-              required
+              onChange={handleOtpChange}
               maxLength={6}
-              pattern="\d{6}" // Strictly enforce exactly 6 digits
+              pattern="\d{6}"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              placeholder="Enter 6-digit OTP"
+              required
             />
           </div>
-          <button type="submit" className="btn" disabled={isSubmitting}>
-            Verify OTP
+          <button
+            type="submit"
+            className="btn bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Verifying...' : 'Verify OTP'}
           </button>
-          <p className="login-link">
+          <p className="login-link mt-4 text-center text-sm">
             Go back to{' '}
-            <a href="/" className="text-blue-600 hover:underline">Login</a>
+            <a href="/" className="text-blue-600 hover:underline">
+              Login
+            </a>
           </p>
         </form>
       </div>

@@ -1,31 +1,34 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 
-const SubscriptionContext = createContext();
+const SubscriptionContext = createContext(null);
 
 export const SubscriptionProvider = ({ children }) => {
-  const [subscription] = useState(null);
+  const [subscription, setSubscription] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // You'll likely want to add logic here to fetch the user's subscription
-  // status when the component mounts or when the user logs in.
-  // This is a placeholder and needs to be implemented based on your backend.
   useEffect(() => {
-    // Example: Fetch subscription data from your backend or Firebase
     const fetchSubscription = async () => {
-      try {  
-        // Replace with your actual fetching logic
+      try {
+        // TODO: Replace this with your actual API call or Firebase query
+        // Example:
         // const response = await fetch('/api/subscription');
         // const data = await response.json();
         // setSubscription(data.subscription);
+
+        // Simulating async fetch with a timeout:
+        await new Promise(res => setTimeout(res, 1000));
+        setSubscription({ status: 'active', plan: 'Pro' }); // Example dummy data
+
       } catch (error) {
         console.error("Error fetching subscription:", error);
+        setSubscription(null);
       } finally {
         setLoading(false);
       }
     };
 
     fetchSubscription();
-  }, []); // Add dependencies if fetching depends on user auth state
+  }, []);
 
   return (
     <SubscriptionContext.Provider value={{ subscription, loading }}>

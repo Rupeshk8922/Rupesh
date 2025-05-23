@@ -11,17 +11,21 @@ export default function useVolunteers({ searchTerm = '', statusFilter = '' } = {
 
   useEffect(() => {
     if (authLoading || !companyId) {
+      setVolunteers([]);  // Clear volunteers while loading or no companyId
       setLoading(true);
+      setError(null);
       return;
     }
 
-    // Reference path
-    let volunteersRef = collection(db, 'data', companyId, 'volunteers');
-    let q = query(volunteersRef, orderBy('name', 'asc'));
+    // Base collection reference
+    const volunteersRef = collection(db, 'data', companyId, 'volunteers');
 
-    // Filtering by status (if provided)
+    // Construct Firestore query with optional status filter
+    let q;
     if (statusFilter) {
       q = query(volunteersRef, where('status', '==', statusFilter), orderBy('name', 'asc'));
+    } else {
+      q = query(volunteersRef, orderBy('name', 'asc'));
     }
 
     const unsubscribe = onSnapshot(
@@ -32,12 +36,12 @@ export default function useVolunteers({ searchTerm = '', statusFilter = '' } = {
           ...doc.data(),
         }));
 
-        // Local search filtering by name/email/phone
-        if (searchTerm) {
+        // Client-side search filtering by name/email/phone (case-insensitive)
+        if (searchTerm.trim()) {
           const lowerSearch = searchTerm.toLowerCase();
           results = results.filter(vol =>
-            (vol.name?.toLowerCase()?.includes(lowerSearch) ||
-             vol.email?.toLowerCase()?.includes(lowerSearch) ||
+            (vol.name?.toLowerCase().includes(lowerSearch) ||
+             vol.email?.toLowerCase().includes(lowerSearch) ||
              vol.phone?.includes(lowerSearch))
           );
         }
@@ -47,14 +51,13 @@ export default function useVolunteers({ searchTerm = '', statusFilter = '' } = {
         setError(null);
       },
       (err) => {
-        console.error("Error fetching volunteers:", err);
+        console.error('Error fetching volunteers:', err);
         setError(err);
         setLoading(false);
       }
     );
 
     return () => unsubscribe();
-
   }, [companyId, authLoading, searchTerm, statusFilter]);
 
   return { volunteers, loading, error };

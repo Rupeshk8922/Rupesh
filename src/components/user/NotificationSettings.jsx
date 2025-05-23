@@ -1,8 +1,6 @@
 import { useState } from 'react';
 
-
 const NotificationSettings = () => {
-  // State to manage notification preferences
   const [preferences, setPreferences] = useState({
     emailNotifications: {
       eventReminders: true,
@@ -15,26 +13,30 @@ const NotificationSettings = () => {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(null);
 
-  // TODO: Implement useEffect to load user preferences from Firestore
-  // useEffect(() => {
-  //   const fetchPreferences = async () => {
-  //     setLoading(true);
-  //     try {
-  //       // Fetch preferences from Firestore for the current user
-  //       // Example: const userDoc = await firestore.collection('users').doc(currentUser.uid).get();
-  //       // if (userDoc.exists) {
-  //       //   setPreferences(userDoc.data().notificationPreferences);
-  //       // }
-  //       setLoading(false);
-  //     } catch {\n
-  //       setError('Failed to load preferences.'); // Removed unused 'err'
-  //       setLoading(false);
-  //     }
-  //   };
-  //   fetchPreferences();
-  // }, []); // Add current user dependency
+  // TODO: Add currentUser context or prop here
+  // const { currentUser } = useAuth();
 
-  // Function to handle changes in preferences
+  // Uncomment and update this useEffect to fetch preferences from Firestore
+  /*
+  useEffect(() => {
+    const fetchPreferences = async () => {
+      if (!currentUser) return;
+      setLoading(true);
+      try {
+        const userDoc = await firestore.collection('users').doc(currentUser.uid).get();
+        if (userDoc.exists) {
+          setPreferences(userDoc.data().notificationPreferences || preferences);
+        }
+        setLoading(false);
+      } catch {
+        setError('Failed to load preferences.');
+        setLoading(false);
+      }
+    };
+    fetchPreferences();
+  }, [currentUser]);
+  */
+
   const handlePreferenceChange = (type) => {
     setPreferences((prevPreferences) => ({
       emailNotifications: {
@@ -44,23 +46,20 @@ const NotificationSettings = () => {
     }));
   };
 
-  // Function to save preferences to Firestore
   const savePreferences = async () => {
     setLoading(true);
     setSuccess(false);
     setError(null);
     try {
-      // TODO: Implement Firestore logic to save preferences
-      // Example: await firestore.collection('users').doc(currentUser.uid).update({
-      //   notificationPreferences: preferences,
-      // });
+      // Replace with Firestore update when ready:
+      // await firestore.collection('users').doc(currentUser.uid).update({ notificationPreferences: preferences });
       console.log('Preferences saved (placeholder):', preferences);
       setSuccess(true);
-      setError(null); // Clear previous errors
+      setError(null);
       setLoading(false);
-    } catch {\n
-      setError('Failed to save preferences.'); // Removed unused 'err'
-      setSuccess(false); // Clear previous success
+    } catch {
+      setError('Failed to save preferences.');
+      setSuccess(false);
       setLoading(false);
     }
   };
@@ -73,44 +72,22 @@ const NotificationSettings = () => {
         <h3 className="text-lg font-semibold mb-4">Email Notifications</h3>
 
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <label htmlFor="eventReminders" className="text-gray-700">
-              Event Reminders
-            </label>
-            <input
-              type="checkbox"
-              id="eventReminders"
-              className="form-checkbox h-5 w-5 text-blue-600 rounded focus:ring-blue-500"
-              checked={preferences.emailNotifications.eventReminders}
-              onChange={() => handlePreferenceChange('eventReminders')}
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <label htmlFor="volunteerEngagementReminders" className="text-gray-700">
-              Volunteer Engagement Reminders
-            </label>
-            <input
-              type="checkbox"
-              id="volunteerEngagementReminders"
-              className="form-checkbox h-5 w-5 text-blue-600 rounded focus:ring-blue-500"
-              checked={preferences.emailNotifications.volunteerEngagementReminders}
-              onChange={() => handlePreferenceChange('volunteerEngagementReminders')}
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <label htmlFor="eventConfirmation" className="text-gray-700">
-              Event Confirmation Emails (for organizers)
-            </label>
-            <input
-              type="checkbox"
-              id="eventConfirmation"
-              className="form-checkbox h-5 w-5 text-blue-600 rounded focus:ring-blue-500"
-              checked={preferences.emailNotifications.eventConfirmation}
-              onChange={() => handlePreferenceChange('eventConfirmation')}
-            />
-          </div>
+          {Object.entries(preferences.emailNotifications).map(([key, value]) => (
+            <div key={key} className="flex items-center justify-between">
+              <label htmlFor={key} className="text-gray-700 capitalize">
+                {key
+                  .replace(/([A-Z])/g, ' $1')
+                  .replace(/^./, (str) => str.toUpperCase())}
+              </label>
+              <input
+                type="checkbox"
+                id={key}
+                className="form-checkbox h-5 w-5 text-blue-600 rounded focus:ring-blue-500"
+                checked={value}
+                onChange={() => handlePreferenceChange(key)}
+              />
+            </div>
+          ))}
         </div>
 
         <button

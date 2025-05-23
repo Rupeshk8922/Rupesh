@@ -1,32 +1,26 @@
-// vite.config.js
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import path from 'path';
+
+// Replace with your actual Cloud Workstation domain if needed
+const host = '3000-idx-empact-1746531438526.cluster-ejd22kqny5htuv5dfowoyipt52.cloudworkstations.dev';
 
 export default defineConfig({
-  plugins: [
-    react({
-      jsxRuntime: 'automatic'
-    }),
-  ],
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
-    },
-  },
+  plugins: [react()],
   server: {
-    port: 3000,
-    host: '0.0.0.0', // ✅ Accept connections from anywhere
-    open: true,
-    https: false,     // ❌ Must be false; let Cloud Workstations handle HTTPS
-    hmr: {
-      protocol: 'wss',
-      host: '3000-idx-empact-1746531438526.cluster-ejd22kqny5htuv5dfowoyipt52.cloudworkstations.dev',
-      clientPort: 443
+ hmbr: {
+ protocol: 'wss',
+ host: host,
+    },
+ proxy: {
+ '/_workstation/': {
+ target: 'https://3000-idx-empact-1746531438526.cluster-ejd22kqny5htuv5dfowoyipt52.cloudworkstations.dev',
+ changeOrigin: true,
+      },
     },
   },
-  build: {
-    outDir: 'dist',
-    sourcemap: true,
-  },
+ resolve: {
+ alias: {
+ '@': '/src',
+    },
+  }
 });

@@ -10,31 +10,37 @@ env:
     availability:
       - BUILD
       - RUNTIME
+
   - variable: VITE_FIREBASE_DATABASE_URL
     value: "https://empact-yhwq3-default-rtdb.asia-southeast1.firebasedatabase.app"
     availability:
       - BUILD
       - RUNTIME
+
   - variable: VITE_FIREBASE_PROJECT_ID
     value: "empact-yhwq3"
     availability:
       - BUILD
       - RUNTIME
+
   - variable: VITE_FIREBASE_STORAGE_BUCKET
     value: "empact-yhwq3.firebasestorage.app"
     availability:
       - BUILD
       - RUNTIME
+
   - variable: VITE_FIREBASE_MESSAGING_SENDER_ID
     value: "1011581028115"
     availability:
       - BUILD
       - RUNTIME
+
   - variable: VITE_FIREBASE_APP_ID
     value: "1:1011581028115:web:b2811728353ecf9521fce6"
     availability:
       - BUILD
       - RUNTIME
+
   - variable: VITE_FIREBASE_MEASUREMENT_ID
     value: "G-9YSYE6PSC6"
     availability:
@@ -42,5 +48,4 @@ env:
       - RUNTIME
 
 runConfig:
-  # Replace 'npm start' with the actual command to start your backend
   start: "npm start"

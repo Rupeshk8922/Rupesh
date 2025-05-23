@@ -1,3 +1,5 @@
+import React from 'react';
+import DashboardLayout from '@/components/DashboardLayout';
 
 const TelecallerDashboard = () => {
   return (

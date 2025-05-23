@@ -1,3 +1,5 @@
+import SidebarLayout from './SidebarLayout';
+
 function DashboardLayout({ role, children }) {
   const allowedRoles = ['admin', 'outreach', 'csr', 'telecaller', 'volunteer'];
 

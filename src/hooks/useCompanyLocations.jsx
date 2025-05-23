@@ -8,20 +8,42 @@ export const useCompanyLocations = (companyId) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    if (!companyId) {
+      setLocations([]);
+      setLoading(false);
+      setError(null);
+      return;
+    }
+
+    let isCancelled = false;
+
     const fetchLocations = async () => {
+      setLoading(true);
+      setError(null);
       try {
         const q = query(collection(db, 'companies', companyId, 'locations'));
         const snapshot = await getDocs(q);
         const result = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setLocations(result);
+
+        if (!isCancelled) {
+          setLocations(result);
+        }
       } catch (err) {
-        setError(err.message);
+        if (!isCancelled) {
+          setError(err.message);
+        }
       } finally {
-        setLoading(false);
+        if (!isCancelled) {
+          setLoading(false);
+        }
       }
     };
 
     fetchLocations();
+
+    return () => {
+      isCancelled = true;
+    };
   }, [companyId]);
 
   return { locations, loading, error };

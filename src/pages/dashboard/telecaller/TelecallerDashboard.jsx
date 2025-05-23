@@ -1,10 +1,7 @@
+import React from 'react';
 
 const TelecallerDashboard = () => {
-  return (
-    <div>
-      {/* Content for Telecaller Dashboard */}
-    </div>
-  );
+  return <div>TelecallerDashboard Placeholder</div>;
 };
 
 export default TelecallerDashboard;

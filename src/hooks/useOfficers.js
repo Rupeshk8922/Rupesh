@@ -1,7 +1,6 @@
-// src/hooks/useOfficers.js
 import { useEffect, useState } from 'react';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
-import { db } from '@/firebase/config'; // Use alias '@' for clean import
+import { db } from '@/firebase/config';
 
 const useOfficers = () => {
   const [officers, setOfficers] = useState([]);
@@ -9,6 +8,7 @@ const useOfficers = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    setLoading(true);
     const q = query(
       collection(db, 'users'),
       where('role', 'in', ['outreach_officer', 'admin'])
@@ -20,7 +20,6 @@ const useOfficers = () => {
         const officersList = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
-          // Prefer displayName fallback to email
           displayName: doc.data().displayName || doc.data().email,
         }));
         setOfficers(officersList);
@@ -29,12 +28,11 @@ const useOfficers = () => {
       },
       (err) => {
         console.error('Error fetching officers:', err);
-        setError(err);
+        setError(err.message || 'Failed to fetch officers.');
         setLoading(false);
       }
     );
 
-    // Clean up listener on unmount
     return () => unsubscribe();
   }, []);
 

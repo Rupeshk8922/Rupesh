@@ -1,11 +1,9 @@
-import { useState } from 'react';
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast, ToastContainer } from 'react-toastify';
 import { useAuth } from '../../context/AuthContext';
-// import ConfirmDeleteModal from '../shared/ConfirmDeleteModal'; // Make sure this exists
+import { MdDelete } from 'react-icons/md';
 
 const VolunteersList = ({ projectId, volunteers, fetchProjectVolunteers }) => {
-  const [showAssignModal, setShowAssignModal] = useState(false); // Keep this for the assign modal
+  const { user } = useAuth();
 
   const handleDeleteVolunteer = async (volunteerId) => {
     try {
@@ -24,14 +22,11 @@ const VolunteersList = ({ projectId, volunteers, fetchProjectVolunteers }) => {
         toast.success('Volunteer unassigned successfully!');
         fetchProjectVolunteers(projectId);
       } else {
-        const errorData = await response.json();
+        const errorData = await response.json(); // Still need errorData to get message
         toast.error(errorData.message || 'Failed to unassign volunteer.');
       }
     } catch {
-      toast.error('An error occurred while unassigning the volunteer.');
-    } finally {
-      // setShowDeleteModal(false); // Commented out as ConfirmDeleteModal is commented out
-      // setSelectedVolunteerId(null); // Commented out as ConfirmDeleteModal is commented out
+      toast.error('An error occurred while unassigning the volunteer.'); // The 'error' variable is not used
     }
   };
 
@@ -39,12 +34,13 @@ const VolunteersList = ({ projectId, volunteers, fetchProjectVolunteers }) => {
     <div className="bg-white p-4 rounded-md shadow-md mt-4">
       <h3 className="text-lg font-semibold mb-4">Assigned Volunteers</h3>
 
-      <button
+      {/* Remove or uncomment if modal is implemented */}
+      {/* <button
         onClick={() => setShowAssignModal(true)}
         className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-200"
       >
         Assign Volunteer
-      </button>
+      </button> */}
 
       <div className="overflow-x-auto mt-4">
         <table className="min-w-full divide-y divide-gray-200">
@@ -68,40 +64,20 @@ const VolunteersList = ({ projectId, volunteers, fetchProjectVolunteers }) => {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <button
-                    onClick={() => {
-                      // setSelectedVolunteerId(volunteer._id); // Commented out as ConfirmDeleteModal is commented out
-                      // setShowDeleteModal(true); // Commented out as ConfirmDeleteModal is commented out
-                    }}
+                    onClick={() => handleDeleteVolunteer(volunteer._id)}
                     className="text-red-600 hover:text-red-900"
                     title="Unassign Volunteer"
                   >
                     <MdDelete size={20} />
                   </button>
-               </td>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
-      {/* Future: Assign Volunteer Modal */}
-      {/* {showAssignModal && (
-        <AssignVolunteerModal
-          projectId={projectId}
-          onClose={() => setShowAssignModal(false)}
-          onAssign={fetchProjectVolunteers}
-        />
-      )} */}
-
-      {/* Confirm Delete Modal */}
-      {/* {showDeleteModal && (
-        <ConfirmDeleteModal
-          message="Are you sure you want to unassign this volunteer from the project?"
-          onConfirm={() => handleDeleteVolunteer(selectedVolunteerId)}
-          onCancel={() => setShowDeleteModal(false)}
-        />
-      )} */}
-
+      {/* Toast notifications */}
       <ToastContainer />
     </div>
   );

@@ -1,77 +1,90 @@
 import { createContext, useContext, useEffect, useState, useMemo } from "react";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, onIdTokenChanged } from "firebase/auth";
 import { auth } from "../firebase/config";
 
 const AuthContext = createContext();
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
-  const [claims, setClaims] = useState(null); // Store custom claims
+  const [claims, setClaims] = useState(null);
 
   useEffect(() => {
-    console.log('AuthContext useEffect: Setting authLoading to true initially');
-    setAuthLoading(true); // Ensure loading is true when effect runs
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      console.log('onAuthStateChanged fired with user:', currentUser);
+    setAuthLoading(true);
+
+    // This handles initial sign-in/sign-out state
+    const unsubscribeAuth = onAuthStateChanged(auth, async (currentUser) => {
+      console.log("onAuthStateChanged fired:", currentUser);
       if (currentUser) {
-        console.log('Authenticated user found.');
+        setUser(currentUser);
         try {
-          console.log('Fetching ID token result...');
           const idTokenResult = await currentUser.getIdTokenResult(true); // Force refresh
-          console.log('Successfully fetched ID token result.');
-          setUser(currentUser);
-          // Ensure new object reference for claims to trigger updates
-          console.log("✅ Claims fetched in authContext:", idTokenResult.claims); // Log the actual object
+          setClaims(idTokenResult.claims);
+          console.log("✅ Claims fetched (initial):", idTokenResult.claims);
         } catch (error) {
-          console.error("❌ Error fetching claims in authContext:", error);
+          console.error("❌ Error fetching claims (initial):", error);
           setClaims(null);
         }
       } else {
-        setClaims(null); // Clear claims if logged out
-        console.log('No user found. Setting authLoading to false.');
+        setUser(null);
+        setClaims(null);
       }
-      // Set authLoading to false after the state change is processed
       setAuthLoading(false);
-      console.log('AuthContext: Final setAuthLoading(false)');
     });
 
-    return () => unsubscribe();
+    // This listens for ID token changes (e.g., token refresh every hour)
+    // and updates claims accordingly *without* user sign out/in
+    const unsubscribeIdToken = onIdTokenChanged(auth, async (currentUser) => {
+      console.log("onIdTokenChanged fired:", currentUser);
+      if (currentUser) {
+        try {
+          const idTokenResult = await currentUser.getIdTokenResult();
+          setClaims(idTokenResult.claims);
+          console.log("🔄 Claims refreshed:", idTokenResult.claims);
+        } catch (error) {
+          console.error("❌ Error refreshing claims:", error);
+          setClaims(null);
+        }
+      } else {
+        // User logged out, clear everything
+        setUser(null);
+        setClaims(null);
+      }
+    });
+
+    // Cleanup both listeners on unmount
+    return () => {
+      unsubscribeAuth();
+      unsubscribeIdToken();
+    };
   }, []);
 
-  // Check if authentication and claims are fully loaded
-  // This determines when the application can start rendering protected routes/data
-  // Changed condition to check for user existence as well
   const authIsFullyLoaded = !authLoading;
 
-  const contextValue = useMemo(() => ({
-    user,
-    authLoading,
-    authIsFullyLoaded,
-    claims, // ✅ Now included properly
-    userRole: claims?.role || null,
-    // Providing companyId and subscriptionStatus directly for convenience
-    companyId: claims?.companyId || null,
-    subscriptionStatus: claims?.subscriptionStatus || null,
-  }), [user, authLoading, claims]); // Dependencies are correct
+  const contextValue = useMemo(
+    () => ({
+      user,
+      authLoading,
+      authIsFullyLoaded,
+      claims,
+      userRole: claims?.role || null,
+      companyId: claims?.companyId || null,
+      subscriptionStatus: claims?.subscriptionStatus || null,
+    }),
+    [user, authLoading, claims]
+  );
 
-  // Block rendering of children until authentication is fully loaded
-  // This prevents components from trying to access data while auth state or claims are being determined
   if (authLoading) {
-    return <div>🔐 Authenticating...</div>; // Or a loading spinner
+    return <div>🔐 Authenticating...</div>;
   }
 
-  return (
-    <AuthContext.Provider value={contextValue}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
 };
-// Custom hook to consume the AuthContext
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider'); 
+    throw new Error("useAuth must be used within an AuthProvider");
   }
-  console.log('useAuth hook returning authIsFullyLoaded:', context.authIsFullyLoaded);
   return context;
 };

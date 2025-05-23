@@ -5,22 +5,24 @@ const EventsList = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [eventToDelete, setEventToDelete] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterTags, setFilterTags] = useState([]);
   const [filterLocation, setFilterLocation] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
   const [sortOrder, setSortOrder] = useState('asc');
 
+  // Missing states added here
+  const [eventToDelete, setEventToDelete] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
   useEffect(() => {
     const getEvents = async () => {
       try {
         const data = await fetchEvents();
         setEvents(data);
-        setLoading(false);
       } catch (err) {
         setError(err.message);
+      } finally {
         setLoading(false);
       }
     };
@@ -38,10 +40,11 @@ const EventsList = () => {
       try {
         await deleteEvent(eventToDelete.id);
         setEvents(events.filter(event => event.id !== eventToDelete.id));
-        setShowDeleteModal(false);
-        setEventToDelete(null);
       } catch (err) {
         console.error("Error deleting event:", err);
+      } finally {
+        setShowDeleteModal(false);
+        setEventToDelete(null);
       }
     }
   };
@@ -153,7 +156,10 @@ const EventsList = () => {
                 <td className="p-2 border">{event.attendees}</td>
                 <td className="p-2 border">{(event.tags || []).join(', ')}</td>
                 <td className="p-2 border flex gap-2 justify-center">
-                  {/* Action buttons */}
+                  {/* Add your action buttons here */}
+                  <button onClick={() => handleDeleteClick(event)} className="text-red-600 hover:underline">
+                    Delete
+                  </button>
                 </td>
               </tr>
             ))}
@@ -161,6 +167,22 @@ const EventsList = () => {
         </table>
       )}
 
+      {/* Optional: Delete confirmation modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-4 rounded shadow-lg">
+            <p>Are you sure you want to delete this event?</p>
+            <div className="mt-4 flex justify-end gap-4">
+              <button onClick={handleCancelDelete} className="px-4 py-2 border rounded">
+                Cancel
+              </button>
+              <button onClick={handleConfirmDelete} className="px-4 py-2 bg-red-600 text-white rounded">
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

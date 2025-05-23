@@ -9,8 +9,9 @@ export const useFetchSubscriptionStatus = (companyId) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
- useEffect(() => {
+  useEffect(() => {
     if (!companyId) {
+      // No companyId provided, reset state
       setSubscription(null);
       setLoading(false);
       setError(null);
@@ -21,14 +22,15 @@ export const useFetchSubscriptionStatus = (companyId) => {
     setError(null);
 
     const subscriptionDocRef = doc(db, 'subscriptions', companyId);
-    
+
     const unsubscribe = onSnapshot(
       subscriptionDocRef,
       (docSnap) => {
         if (docSnap.exists()) {
           setSubscription(docSnap.data());
         } else {
-          setSubscription(null); // No subscription found
+          // Subscription document not found for this company
+          setSubscription(null);
         }
         setLoading(false);
       },
@@ -39,7 +41,8 @@ export const useFetchSubscriptionStatus = (companyId) => {
       }
     );
 
-    return () => unsubscribe(); // Cleanup listener on unmount
+    // Cleanup listener on unmount or when companyId changes
+    return () => unsubscribe();
   }, [companyId]);
 
   return { subscription, loading, error };

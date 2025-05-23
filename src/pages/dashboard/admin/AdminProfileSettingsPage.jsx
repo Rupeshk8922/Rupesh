@@ -1,32 +1,37 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../../firebase/config';
-import { useAuth } from '../../../contexts/authContext.jsx'; // Assuming useAuth provides user and companyId
+import { useAuth } from '../../../contexts/authContext.jsx';
 
-function AdminProfileSettingsPage() { // <--- The function definition starts here
-  // --- State Variables ---
+function AdminProfileSettingsPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [role, setRole] = useState('');
   const [error, setError] = useState(null);
-  const [isUpdating, setIsUpdating] = useState(false);
   const [updateSuccess, setUpdateSuccess] = useState(false);
-  const [isLoading, setIsLoading] = useState(true); // Added for initial loading state
+  const [isLoading, setIsLoading] = useState(true);
+  const [isUpdating, setIsUpdating] = useState(false);
 
-  // --- Auth Context ---
-  const { user, companyId } = useAuth(); // Assuming useAuth provides user and companyId
+  const { user, companyId } = useAuth();
+  const navigate = useNavigate();
 
-  // --- Effect Hook for Fetching Profile Data ---
+  // Redirect if user is not admin (optional - adjust role check as per your roles)
+  useEffect(() => {
+    if (role && role !== 'admin') {
+      navigate('/not-authorized'); // or any fallback route
+    }
+  }, [role, navigate]);
+
+  // Fetch profile data
   useEffect(() => {
     const fetchAdminProfile = async () => {
-      // Only proceed if user and companyId are available
       if (!user || !companyId) {
-        setIsLoading(false); // Stop loading if no user/companyId
+        setIsLoading(false);
         return;
       }
-
-      setIsLoading(true); // Start loading when fetch begins
-      setError(null); // Clear previous errors
+      setIsLoading(true);
+      setError(null);
 
       try {
         const adminDocRef = doc(db, 'companies', companyId, 'users', user.uid);
@@ -36,7 +41,7 @@ function AdminProfileSettingsPage() { // <--- The function definition starts her
           const data = docSnap.data();
           setName(data.name || '');
           setEmail(data.email || '');
-          setRole(data.role || ''); // Assuming role is stored
+          setRole(data.role || '');
         } else {
           setError('Admin profile not found.');
         }
@@ -44,101 +49,129 @@ function AdminProfileSettingsPage() { // <--- The function definition starts her
         console.error('Error fetching admin profile:', err);
         setError('Failed to load profile.');
       } finally {
-        setIsLoading(false); // Stop loading regardless of success or failure
+        setIsLoading(false);
       }
     };
 
     fetchAdminProfile();
-  }, [user, companyId]); // Dependencies: re-run if user or companyId changes
+  }, [user, companyId]);
 
-  // --- Handle Profile Update ---
+  // Handle update with validation and error clearing
   const handleUpdateProfile = async (e) => {
-    e.preventDefault(); // Prevent default form submission
-    if (!user || !companyId) return; // Do nothing if auth data is missing
+    e.preventDefault();
+    if (!user || !companyId) return;
 
-    setIsUpdating(true); // Indicate update is in progress
-    setError(null); // Clear previous errors
-    setUpdateSuccess(false); // Reset success message
+    if (!name.trim()) {
+      setError('Name cannot be empty.');
+      return;
+    }
+
+    setIsUpdating(true);
+    setError(null);
+    setUpdateSuccess(false);
 
     try {
       const adminDocRef = doc(db, 'companies', companyId, 'users', user.uid);
-      await updateDoc(adminDocRef, {
-        name: name,
-        // Note: Email and Role are typically not changed via a user profile form
-        // If they were, you'd add them here. For now, assuming only name can be updated.
-      });
-      setUpdateSuccess(true); // Set success flag
-      // Optionally, you might want to refetch the profile here if other fields could have changed
-      // but for just updating 'name', it's often not strictly necessary as 'name' is already in state.
+      await updateDoc(adminDocRef, { name: name.trim() });
+      setUpdateSuccess(true);
     } catch (err) {
       console.error('Error updating admin profile:', err);
       setError('Failed to update profile.');
-      setUpdateSuccess(false); // Ensure success is false on error
+      setUpdateSuccess(false);
     } finally {
-      setIsUpdating(false); // Stop indicating update is in progress
+      setIsUpdating(false);
     }
   };
 
-  // --- Conditional Rendering for Loading/Error States ---
+  // Clear error on input change for better UX
+  const onNameChange = (e) => {
+    setName(e.target.value);
+    if (error) setError(null);
+    if (updateSuccess) setUpdateSuccess(false);
+  };
+
   if (isLoading) {
     return <div className="p-4 text-center text-blue-600">Loading profile...</div>;
   }
 
-  if (error) {
-    return <div className="p-4 text-red-500 text-center">Error: {error}</div>;
+  if (error && !updateSuccess) {
+    // Show error full page only if it’s fetching error, not update error in form
+    return <div className="p-4 text-red-600 text-center">Error: {error}</div>;
   }
 
-  // --- Main Component Render (JSX) ---
   return (
-    <div className="p-4 max-w-md mx-auto bg-white shadow-md rounded-lg">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">Profile Settings</h2>
-      <form onSubmit={handleUpdateProfile}>
-        <div className="mb-4">
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Name:</label>
+    <div className="p-6 max-w-md mx-auto bg-white shadow-md rounded-lg">
+      <h2 className="text-3xl font-semibold mb-6 text-gray-900">Profile Settings</h2>
+      <form onSubmit={handleUpdateProfile} noValidate>
+        <div className="mb-5">
+          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+            Name
+          </label>
           <input
-            type="text"
             id="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-            disabled={isUpdating} // Disable input during update
-          />
-        </div>
-        <div className="mb-4">
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email:</label>
-          <input
-            type="email"
-            id="email"
-            value={email}
-            disabled // Email is read-only
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 cursor-not-allowed sm:text-sm"
-          />
-        </div>
-        <div className="mb-6"> {/* Added more bottom margin for clarity */}
-          <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">Role:</label>
-          <input
             type="text"
-            id="role"
-            value={role}
-            disabled // Role is read-only
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 cursor-not-allowed sm:text-sm"
+            value={name}
+            onChange={onNameChange}
+            disabled={isUpdating}
+            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm 
+                       focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            aria-describedby="name-error"
+            required
           />
         </div>
 
-        {/* --- Feedback Messages --- */}
-        {updateSuccess && <p className="text-green-600 text-sm mb-4">Profile updated successfully!</p>}
-        {error && <p className="text-red-600 text-sm mb-4">Error: {error}</p>} {/* Display update errors too */}
+        <div className="mb-5">
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            Email
+          </label>
+          <input
+            id="email"
+            type="email"
+            value={email}
+            disabled
+            className="block w-full px-3 py-2 bg-gray-100 cursor-not-allowed rounded-md border border-gray-300 sm:text-sm"
+          />
+        </div>
+
+        <div className="mb-6">
+          <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
+            Role
+          </label>
+          <input
+            id="role"
+            type="text"
+            value={role}
+            disabled
+            className="block w-full px-3 py-2 bg-gray-100 cursor-not-allowed rounded-md border border-gray-300 sm:text-sm"
+          />
+        </div>
+
+        {/* Accessible live region for feedback */}
+        <div
+          role="alert"
+          aria-live="polite"
+          className="mb-4 min-h-[1.5em] text-center text-sm"
+        >
+          {updateSuccess && <p className="text-green-600">Profile updated successfully!</p>}
+          {error && !isLoading && !updateSuccess && (
+            <p id="name-error" className="text-red-600">
+              {error}
+            </p>
+          )}
+        </div>
 
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-60 disabled:cursor-not-allowed transition duration-150 ease-in-out"
-          disabled={isUpdating} // Disable button during update
+          disabled={isUpdating}
+          className="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 
+                     focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 
+                     disabled:opacity-60 disabled:cursor-not-allowed transition"
         >
           {isUpdating ? 'Updating...' : 'Update Profile'}
         </button>
       </form>
     </div>
   );
-} // <--- The function definition ends here
+}
 
 export default AdminProfileSettingsPage;

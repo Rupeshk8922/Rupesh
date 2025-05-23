@@ -1,1 +1,3 @@
-import { useAuth } from '@/hooks/useAuth';
+ 
+
+// Do something with currentUser...

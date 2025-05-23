@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { collection, query, getDocs } from 'firebase/firestore';
-import { db } from '../firebase/config'; // Assuming db is exported from your config
+import { db } from '../firebase/config';
 
 const useFetchCompanyUsers = (companyId) => {
   const [users, setUsers] = useState([]);
@@ -8,26 +8,30 @@ const useFetchCompanyUsers = (companyId) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      if (!companyId) {
-        setUsers([]);
-        setLoading(false);
-        return;
-      }
+    if (!companyId) {
+      setUsers([]);
+      setLoading(false);
+      setError(null);
+      return;
+    }
 
+    const fetchUsers = async () => {
+      setLoading(true);
+      setError(null);
       try {
         const usersCollectionRef = collection(db, 'companies', companyId, 'users');
         const q = query(usersCollectionRef);
         const querySnapshot = await getDocs(q);
         const usersList = querySnapshot.docs.map(doc => ({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         }));
         setUsers(usersList);
-        setLoading(false);
       } catch (err) {
         console.error('Error fetching company users:', err);
-        setError(err.message);
+        setError(err.message || 'Failed to fetch users');
+        setUsers([]);
+      } finally {
         setLoading(false);
       }
     };

@@ -1,5 +1,5 @@
 import { useAuth } from "@/hooks/useAuth";
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const DashboardLayout = ({ children }) => {

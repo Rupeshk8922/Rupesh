@@ -39,15 +39,15 @@ export const useLeads = () => {
             setLoading(false);
           },
           (err) => {
+            console.error('Error fetching leads:', err);
             setError(err);
             setLoading(false);
-            console.error('Error fetching leads:', err);
           }
         );
       } catch (err) {
+        console.error('Error setting up leads listener:', err);
         setError(err);
         setLoading(false);
-        console.error('Error setting up leads listener:', err);
       }
     };
 
@@ -55,6 +55,7 @@ export const useLeads = () => {
       fetchLeads();
     }
 
+    // Cleanup listener on unmount or dependency change
     return () => unsubscribe();
   }, [companyId, authLoading]);
 

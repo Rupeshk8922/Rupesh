@@ -1,3 +1,5 @@
+import { Skeleton, Card, CardContent } from '@mui/material';
+import { AlertTriangle, Users } from 'react-icons/lucide';
 // src/components/LeadsTable.jsx
 const LeadsTable = ({ leads, loading, error }) => {
   if (loading) {

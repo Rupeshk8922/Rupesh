@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { collection, query, where, getDocs } from 'firebase/firestore';
-import { db } from '../firebase/config'; // Assuming db is exported from your config
+import { db } from '../firebase/config';
 
 export const useFetchLeads = (companyId, userId) => {
   const [leads, setLeads] = useState([]);
@@ -10,15 +10,15 @@ export const useFetchLeads = (companyId, userId) => {
   useEffect(() => {
     const fetchLeads = async () => {
       if (!companyId || !userId) {
-        setIsLoading(false);
         setLeads([]);
-        // setError("Company ID or User ID is missing."); // Optionally set an error
+        setIsLoading(false);
+        setError(null); // Clear any previous errors
         return;
       }
 
       setIsLoading(true);
       setError(null);
-      setLeads([]); // Clear previous leads
+      setLeads([]); // Clear old leads before fetching new
 
       try {
         const leadsCollectionRef = collection(db, 'leads');
@@ -31,20 +31,21 @@ export const useFetchLeads = (companyId, userId) => {
         const querySnapshot = await getDocs(q);
         const leadsList = querySnapshot.docs.map(doc => ({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         }));
 
         setLeads(leadsList);
       } catch (err) {
         console.error("Error fetching leads:", err);
-        setError('Failed to fetch leads.');
+        setError(err.message || 'Failed to fetch leads.');
+        setLeads([]); // Clear data on error to avoid stale display
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchLeads();
-  }, [companyId, userId]); // Re-run effect when companyId or userId changes
+  }, [companyId, userId]);
 
   return { leads, isLoading, error };
 };

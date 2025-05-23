@@ -2,64 +2,77 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Allow authenticated users to read their own user document
-    // Users can read their own profile
+    // Users can only read and create their own user document
     match /users/{userId} {
-      allow read: if request.auth != null && request.auth.uid == userId;
-      // Add other rules for create, update, delete as needed for user documents
+      allow read, create: if request.auth != null && request.auth.uid == userId;
+      // Add update/delete rules if needed (e.g., user can update their own profile)
+      allow update, delete: if request.auth != null && request.auth.uid == userId;
     }
 
-    match /users/{userId} {
-      allow read: if request.auth != null && request.auth.uid == userId; // Corrected to allow only own profile read
-      allow create: if request.auth != null && request.auth.uid == userId; // Allow authenticated users to create their own document
-    }
-
-    // Allow company users to read their company document based on custom claim
+    // Companies: only users with matching companyId claim can read company document
     match /companies/{companyId} {
       allow read: if request.auth != null &&
- request.auth.token.companyId == companyId;
+                  request.auth.token.companyId == companyId;
+      // Consider add write/update/delete rules for admins if needed
+      allow write, update, delete: if request.auth != null &&
+                                   request.auth.token.role == "admin" &&
+                                   request.auth.token.companyId == companyId;
     }
 
-    // Company data only visible to users within that company
+    // Users subcollection under companies: user can read/write own user doc
+    // Admins of the company can read/write any user in the company
     match /companies/{companyId}/users/{userId} {
       allow read, write: if request.auth != null && (
- request.auth.uid == userId ||
- (request.auth.token.role == "admin" &&
- request.auth.token.companyId == companyId)
+        request.auth.uid == userId ||
+        (request.auth.token.role == "admin" &&
+         request.auth.token.companyId == companyId)
       );
     }
 
-    // Allow access to leads for specific roles within their company
+    // Leads accessible to roles admin, csr, telecaller within same company
     match /leads/{leadId} {
- allow read, write: if request.auth != null &&
- request.auth.token.companyId == resource.data.companyId &&
- request.auth.token.role in ['admin', 'csr', 'telecaller'];
+      allow read, write: if request.auth != null &&
+                         request.auth.token.companyId == resource.data.companyId &&
+                         request.auth.token.role in ['admin', 'csr', 'telecaller'];
     }
-    
-    // Allow access to events for specific roles within their company
+
+    // Events accessible to roles admin, outreach, volunteer within same company
     match /events/{eventId} {
       allow read: if request.auth != null &&
- request.auth.token.companyId == resource.data.companyId &&
- request.auth.token.role in ['admin', 'outreach', 'volunteer'];
+                  request.auth.token.companyId == resource.data.companyId &&
+                  request.auth.token.role in ['admin', 'outreach', 'volunteer'];
+      // Add write/update if needed for authorized roles
+      allow write, update: if request.auth != null &&
+                           request.auth.token.companyId == resource.data.companyId &&
+                           request.auth.token.role in ['admin', 'outreach'];
     }
 
-    // Allow access to volunteer hours
+    // Volunteer hours:
     match /volunteer_hours/{hourId} {
+      // Volunteers can create their own volunteer hour records
       allow create: if request.auth != null &&
-                  request.auth.uid == request.resource.data.volunteerId;
+                    request.auth.uid == request.resource.data.volunteerId;
+
+      // Volunteers can read their own volunteer hour records
       allow read: if request.auth != null && (
-                  request.auth.uid == resource.data.volunteerId ||
-                  (request.auth.token.role == "admin" &&
-                   request.auth.token.companyId == get(/databases/$(database)/documents/users/$(resource.data.volunteerId)).data.companyId)); // Requires fetching volunteer's companyId
+        request.auth.uid == resource.data.volunteerId ||
+        (request.auth.token.role == "admin" &&
+         request.auth.token.companyId == get(/databases/$(database)/documents/users/$(resource.data.volunteerId)).data.companyId)
+      );
+
+      // Admins can update volunteer hours if company matches and certain fields are not changed
       allow update: if request.auth != null &&
                     request.auth.token.role == "admin" &&
-                    request.auth.token.companyId == get(/databases/$(database)/documents/users/$(resource.data.volunteerId)).data.companyId && // Requires fetching volunteer's companyId
+                    request.auth.token.companyId == get(/databases/$(database)/documents/users/$(resource.data.volunteerId)).data.companyId &&
                     !("volunteerId" in request.resource.data) &&
                     !("eventId" in request.resource.data);
+      
+      // Deletion can be restricted or allowed similarly, add if needed
     }
 
-    // Keep your existing rules for other collections below this
-    // match /your_collection/{documentId} {
-    //   // ... your rules for this collection
+    // Default deny rule for all other documents/collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
   }
 }

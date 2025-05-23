@@ -1,29 +1,29 @@
 import { useState, useEffect } from 'react';
-// import { db } from '@/firebase/config'; // Uncomment and configure when ready
-// import { collection, getDocs } from 'firebase/firestore'; // Firebase Firestore imports
- 
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '@/firebase/config';
+
 const useOfficers = () => {
   const [officers, setOfficers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Placeholder: Replace with actual Firestore fetching logic
     async function fetchOfficers() {
       try {
         setLoading(true);
         setError(null);
 
-        // Example Firestore fetching (uncomment when ready)
-        // const officersCollection = collection(db, 'officers');
-        // const officersSnapshot = await getDocs(officersCollection);
-        // const officersList = officersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        // setOfficers(officersList);
+        const officersCollection = collection(db, 'officers');
+        const officersSnapshot = await getDocs(officersCollection);
+        const officersList = officersSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          displayName: doc.data().displayName || doc.data().email,
+        }));
 
-        // Temporary dummy data (remove when real fetch is implemented)
-        setOfficers([]);
+        setOfficers(officersList);
       } catch (err) {
-        setError(err);
+        setError(err.message || 'Failed to fetch officers');
       } finally {
         setLoading(false);
       }
